@@ -1,0 +1,50 @@
+UI:
+	0.列表:
+		Page0: 书籍列表，verticle RecyclerView
+			Button0 -> 添加书籍
+			Button1 -> 管理书籍
+			Button2 -> 点击书籍Item，进入文字浏览page
+		Page1: 添加书籍，自动扫描文件系统中符合小说特征的文件并列出
+			Button0 -> 调用系统文件选择功能
+	1.阅读:
+		Page0: 文字浏览,自定义View，绘制文字内容以及必要的时间&电量&进度
+			Button0 -> 手势动作，向前翻页
+			Butotn1 -> 手势动作，向后翻页
+			Button2 -> 手势动作，唤出菜单
+			Button3 -> 菜单中的按钮，进入章节目录Page
+			Button4 -> 菜单中的按钮，增大阅读字体
+			Button5 -> 菜单中的按钮，缩小阅读字体
+			Button6 -> 菜单中的按钮，修改String编码
+	2.目录:
+		Page0: 章节目录，verticle RecyclerView
+			Button0 -> 检索章节目录
+	3.主题动态更换
+
+Data Structure:
+	0.Book:
+		id: Int,
+		name: String,
+		path: String,
+		readProgressInByte: Int,
+		encode: String,
+		brief: String,
+		size: Int
+	1.Chapter:
+		id: Int,
+		bookId: Int,
+		name: String,
+		number: Int,
+		pisitionInByte: Int,
+		sizeInCharacter: Int
+
+
+Implementation:
+	· Single Activity ———— MVVM设计模式
+	· Kotlin语言
+	· AndroidNavigation作为导航逻辑
+	· Room管理数据
+	· DataStore管理偏好设置
+	· 动态换肤
+
+
+
