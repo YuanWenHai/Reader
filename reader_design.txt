@@ -1,6 +1,6 @@
 UI:
 	0.列表:
-		Page0: 书籍列表，verticle RecyclerView
+		Page0: 书籍列表，vertical RecyclerView
 			Button0 -> 添加书籍
 			Button1 -> 管理书籍
 			Button2 -> 点击书籍Item，进入文字浏览page
@@ -16,7 +16,7 @@ UI:
 			Button5 -> 菜单中的按钮，缩小阅读字体
 			Button6 -> 菜单中的按钮，修改String编码
 	2.目录:
-		Page0: 章节目录，verticle RecyclerView
+		Page0: 章节目录，vertical RecyclerView
 			Button0 -> 检索章节目录
 	3.主题动态更换
 
@@ -28,14 +28,17 @@ Data Structure:
 		readProgressInByte: Int,
 		encode: String,
 		brief: String,
-		size: Int
+		size: Int,
+		charCount: Int,
+		lastReadTime: Int,
+		lastReadParagraph: String
 	1.Chapter:
 		id: Int,
 		bookId: Int,
 		name: String,
 		number: Int,
-		pisitionInByte: Int,
-		sizeInCharacter: Int
+		positionInByte: Int,
+		charCount: Int
 
 
 Implementation:

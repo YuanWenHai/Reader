@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -30,15 +31,46 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
+    def room_version = "2.3.0-alpha03"
+    def paging_version = "3.0.0-alpha09"
+    def nav_version = "2.3.1"
+    def fragment_version = "1.2.5"
+    def recycler_version = "1.1.0"
+    def card_view_version = "1.0.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'com.google.android.material:material:1.2.1'
+
+    //paging
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+
+    //room
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+
+    //navigation
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+    //fragment
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+
+    //recyclerview
+    implementation "androidx.recyclerview:recyclerview:$recycler_version"
+
+
+    //cardView
+    implementation "androidx.cardview:cardview:$card_view_version"
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
