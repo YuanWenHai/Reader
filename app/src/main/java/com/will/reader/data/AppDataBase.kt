@@ -10,7 +10,7 @@ import com.will.reader.data.model.Chapter
 /**
  * created  by will on 2020/11/22 11:20
  */
-@Database(entities = [Book::class, Chapter::class],version = 1)
+@Database(entities = [Book::class, Chapter::class],version = 1,exportSchema = false)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun getBookDao(): BookDao
     abstract fun getChapterDao(): ChapterDao

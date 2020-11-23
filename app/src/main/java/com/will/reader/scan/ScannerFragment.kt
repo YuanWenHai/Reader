@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.will.reader.databinding.FragmentScannerBinding
+import kotlinx.coroutines.launch
 
 /**
  * created  by will on 2020/11/22 16:59
@@ -31,6 +33,9 @@ class ScannerFragment: Fragment(){
         binding.fragmentScannerRecycler.adapter = adapter
         viewModel.getList().observe(viewLifecycleOwner){
             adapter.submitList(it)
+        }
+        viewModel.getCursor().observe(viewLifecycleOwner){
+            binding.fragmentScannerCursor.text = ("搜索文件夹：$it")
         }
     }
 }

@@ -9,11 +9,16 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:theme="@style/ToolbarTheme" />
+        <TextView
+            android:id="@+id/fragment_scanner_cursor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fragment_scanner_toolbar"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/fragment_scanner_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/fragment_scanner_toolbar"/>
+            android:layout_below="@id/fragment_scanner_cursor"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fragment_scanner_fab"
