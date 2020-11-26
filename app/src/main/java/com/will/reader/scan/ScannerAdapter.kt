@@ -40,11 +40,12 @@ class ScannerAdapter(private val callback: (index: Int) -> Unit): ListAdapter<Fi
 
     class ScannerDifferCallback: DiffUtil.ItemCallback<FileItem>(){
         override fun areItemsTheSame(oldItem: FileItem, newItem: FileItem): Boolean {
-            return oldItem.path == newItem.path
+            return oldItem.path == newItem.path && oldItem.selected == newItem.selected
         }
 
         override fun areContentsTheSame(oldItem: FileItem, newItem: FileItem): Boolean {
-            return oldItem == newItem
+            return oldItem.path == newItem.path && oldItem.selected == newItem.selected
         }
+
     }
 }

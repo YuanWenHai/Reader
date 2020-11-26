@@ -6,5 +6,13 @@
     <fragment
         android:id="@+id/bookListFragment"
         android:name="com.will.reader.bookList.BookListFragment"
-        android:label="BookListFragment" />
+        android:label="BookListFragment" >
+        <action
+            android:id="@+id/action_bookListFragment_to_scannerFragment"
+            app:destination="@id/scannerFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/scannerFragment"
+        android:name="com.will.reader.scan.ScannerFragment"
+        android:label="ScannerFragment" />
 </navigation>

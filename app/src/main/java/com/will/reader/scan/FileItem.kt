@@ -11,4 +11,5 @@ data class FileItem(
     val path: String,
     val selected: Boolean
 ) {
+
 }
