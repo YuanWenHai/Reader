@@ -16,7 +16,7 @@ interface ChapterDao {
     fun getChapterInPage(): PagingSource<Int,Chapter>
 
     @Query("SELECT * FROM chapter WHERE id=:id")
-    fun getChapterById(id: Int): Chapter
+    fun getChapterById(id: Long): Chapter
 
     @Insert
     fun saveChapter(chapter: Chapter)

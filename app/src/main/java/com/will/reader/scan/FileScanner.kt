@@ -2,6 +2,8 @@ package com.will.reader.scan
 
 import androidx.lifecycle.MutableLiveData
 import com.will.reader.bookList.util.Util
+import com.will.reader.extensions.isBook
+import com.will.reader.extensions.suffix
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -46,13 +48,8 @@ class FileScanner {
         var flag = false
         val lengthLimit = 1024 * 100 // 50kb
 
-        if(file.length() >= lengthLimit){
-            val suffix = with(file.name){
-                substring(lastIndexOf(".") + 1, length).toUpperCase(Locale.ROOT)
-            }
-            if(suffix == "TXT" || suffix == "TEXT"){
-                flag = true
-            }
+        if(file.length() >= lengthLimit && file.isBook()){
+            flag = true
         }
         return flag
     }

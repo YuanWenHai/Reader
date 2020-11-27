@@ -14,14 +14,21 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.will.reader.R
+import com.will.reader.data.AppDataBase
+import com.will.reader.data.BookRepository
 import com.will.reader.databinding.FragmentScannerBinding
+import com.will.reader.extensions.isBook
+import com.will.reader.extensions.toPath
+import com.will.reader.util.makeLongToast
+import com.will.reader.util.makeToast
+import java.io.File
 
 /**
  * created  by will on 2020/11/22 16:59
  */
 class ScannerFragment: Fragment(){
     private val viewModel: ScannerViewModel by viewModels{
-        ScannerViewModelFactory()
+        ScannerViewModelFactory(BookRepository(AppDataBase.getInstance(requireContext()).getBookDao()))
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,18 +41,28 @@ class ScannerFragment: Fragment(){
     }
 
     private fun init(binding: FragmentScannerBinding){
+        //toolbar
         setHasOptionsMenu(true)
         val parent = activity as AppCompatActivity
         parent.setSupportActionBar(binding.fragmentScannerToolbar)
         parent.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.fragmentScannerToolbar.setNavigationOnClickListener{parent.onBackPressed()}
+        //recycler
         val adapter = ScannerAdapter{
             viewModel.changeSelectState(it)
         }
         binding.fragmentScannerRecycler.adapter = adapter
         binding.fragmentScannerRecycler.addItemDecoration(DividerItemDecoration(requireContext(),LinearLayoutManager.VERTICAL))
+        //fab
+        binding.fragmentScannerFab.setOnClickListener{
+            viewModel.saveSelectedFile()
+            requireActivity().onBackPressed()
+        }
+
         viewModel.getList().observe(viewLifecycleOwner){
-            adapter.submitList(it) {
+            list ->
+            //在这版recyclerview依赖当中submitList()貌似有点问题，直接return了相同对象的提交，所以这里提交一个不同的
+            adapter.submitList(list.toMutableList()) {
             }
         }
         viewModel.getCursor().observe(viewLifecycleOwner){
@@ -115,8 +132,20 @@ class ScannerFragment: Fragment(){
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == pickFileCode){
             if(resultCode == Activity.RESULT_OK){
-                val path = data?.data?.path ?: ""
-                Log.e("log",path)
+                val path = data?.data?.toPath(requireContext()) ?: ""
+                if(path.isNotEmpty()){
+                    val file = File(path)
+                    if(!file.exists()){
+                        makeLongToast(requireContext(),"添加失败，文件 ${file.path}不存在")
+                        return
+                    }
+                    if(!file.isBook()){
+                        makeLongToast(requireContext(),"添加失败，文件 ${file.path}不是txt文件")
+                        return
+                    }
+                    viewModel.save(file)
+                    requireActivity().onBackPressed()
+                }
             }
         }else{
             super.onActivityResult(requestCode, resultCode, data)

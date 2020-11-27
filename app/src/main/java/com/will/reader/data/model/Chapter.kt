@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "chapter")
 data class Chapter(
     @PrimaryKey
-    val id: Int,
+    val id: Long,
     val bookId: Int,
     val name: String,
     val number: Int,

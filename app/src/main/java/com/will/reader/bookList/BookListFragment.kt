@@ -8,12 +8,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.CombinedLoadStates
 import com.will.reader.R
 import com.will.reader.bookList.viewmodel.BookListViewModel
 import com.will.reader.bookList.viewmodel.BookViewModelFactory
 import com.will.reader.data.AppDataBase
 import com.will.reader.databinding.FragmentBookListBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * created  by will on 2020/11/22 12:15
@@ -40,7 +44,13 @@ class BookListFragment: Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             viewModel.bookFlow.collectLatest {
                 adapter.submitData(it)
-                binding.bookListEmptyView.visibility = if(adapter.itemCount == 0) View.GONE else View.VISIBLE
+            }
+        }
+        //binding.bookListEmptyView.visibility = View.GONE//if (adapter.itemCount == 0) View.VISIBLE else View.VISIBLE
+        viewLifecycleOwner.lifecycleScope.launch {
+            adapter.loadStateFlow.collectLatest {
+                // TODO: 2020/11/27 why ?
+                binding.bookListEmptyView.visibility = View.GONE
             }
         }
     }

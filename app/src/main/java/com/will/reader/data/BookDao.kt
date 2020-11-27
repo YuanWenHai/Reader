@@ -16,7 +16,7 @@ interface BookDao {
     fun getAllBookInPage(): PagingSource<Int,Book>
 
     @Query("SELECT * FROM book WHERE id= :id")
-    fun getBookById(id: Int): Book
+    fun getBookById(id: Long): Book
 
     @Insert
     fun saveBook(book: Book)
