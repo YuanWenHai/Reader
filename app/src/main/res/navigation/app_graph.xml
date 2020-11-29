@@ -10,9 +10,20 @@
         <action
             android:id="@+id/action_bookListFragment_to_scannerFragment"
             app:destination="@id/scannerFragment" />
+        <action
+            android:id="@+id/action_bookListFragment_to_readerFragment"
+            app:destination="@id/readerFragment" />
     </fragment>
     <fragment
         android:id="@+id/scannerFragment"
         android:name="com.will.reader.scan.ScannerFragment"
         android:label="ScannerFragment" />
+    <fragment
+        android:id="@+id/readerFragment"
+        android:name="com.will.reader.print.ReaderFragment"
+        android:label="ReaderFragment" >
+        <argument
+            android:name="book"
+            app:argType="com.will.reader.data.model.Book" />
+    </fragment>
 </navigation>

@@ -18,6 +18,9 @@ interface BookDao {
     @Query("SELECT * FROM book WHERE id= :id")
     fun getBookById(id: Long): Book
 
+    @Query("SELECT * FROM book WHERE path= :path" )
+    fun getBookByPath(path: String): Book?
+
     @Insert
     fun saveBook(book: Book)
 

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.will.reader.R
@@ -56,7 +57,7 @@ class ScannerFragment: Fragment(){
         //fab
         binding.fragmentScannerFab.setOnClickListener{
             viewModel.saveSelectedFile()
-            requireActivity().onBackPressed()
+            findNavController().popBackStack()
         }
 
         viewModel.getList().observe(viewLifecycleOwner){
@@ -144,7 +145,7 @@ class ScannerFragment: Fragment(){
                         return
                     }
                     viewModel.save(file)
-                    requireActivity().onBackPressed()
+                    findNavController().popBackStack()
                 }
             }
         }else{

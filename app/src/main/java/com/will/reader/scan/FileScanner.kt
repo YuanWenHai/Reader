@@ -1,9 +1,7 @@
 package com.will.reader.scan
 
-import androidx.lifecycle.MutableLiveData
-import com.will.reader.bookList.util.Util
 import com.will.reader.extensions.isBook
-import com.will.reader.extensions.suffix
+import com.will.reader.extensions.toFormattedSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -38,7 +36,7 @@ class FileScanner {
             }
         }else if (f.isFile){
             if(filter(f)) {
-                val fileItem = FileItem(name = f.name,size = Util.byteSizeToFormattedString(f.length()),path = f.path,false)
+                val fileItem = FileItem(name = f.name,size = f.toFormattedSize(),path = f.path,false)
                 itemCallback(fileItem)
             }
 

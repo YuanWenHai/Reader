@@ -14,6 +14,8 @@ import com.will.reader.bookList.viewmodel.BookListViewModel
 import com.will.reader.bookList.viewmodel.BookViewModelFactory
 import com.will.reader.data.AppDataBase
 import com.will.reader.databinding.FragmentBookListBinding
+import com.will.reader.print.ReaderFragment
+import com.will.reader.print.ReaderFragmentArgs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -39,18 +41,18 @@ class BookListFragment: Fragment() {
         setHasOptionsMenu(true)
         val parent = activity as AppCompatActivity
         parent.setSupportActionBar(binding.bookListToolbar)
-        val adapter = BookListAdapter()
+        val adapter = BookListAdapter{
+            findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment(it))
+        }
         binding.bookListRecycler.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             viewModel.bookFlow.collectLatest {
                 adapter.submitData(it)
             }
         }
-        //binding.bookListEmptyView.visibility = View.GONE//if (adapter.itemCount == 0) View.VISIBLE else View.VISIBLE
         viewLifecycleOwner.lifecycleScope.launch {
             adapter.loadStateFlow.collectLatest {
-                // TODO: 2020/11/27 why ?
-                binding.bookListEmptyView.visibility = View.GONE
+                binding.bookListEmptyView.visibility = if(adapter.itemCount == 0) View.VISIBLE else View.GONE
             }
         }
     }

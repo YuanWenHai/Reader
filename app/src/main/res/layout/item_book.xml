@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
-            name="viewModel"
-            type="com.will.reader.bookList.viewmodel.BookItemViewModel" />
+            name="bookItem"
+            type="com.will.reader.bookList.viewmodel.BookItem" />
     </data>
     <androidx.cardview.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:orientation="vertical"
+        android:layout_height="wrap_content"
+        app:cardUseCompatPadding="true">
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="4dp">
             <TextView
                 android:id="@+id/item_book_list_name"
                 android:layout_width="match_parent"
@@ -20,14 +22,42 @@
                 android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:text="@{viewModel.name}"/>
+                android:text="@{bookItem.name}"
+                tools:text="骑士的沙丘"/>
             <TextView
                 android:id="@+id/item_book_list_brief"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{viewModel.brief}"/>
+                android:text="@{bookItem.brief}"
+                android:layout_below="@id/item_book_list_name"
+                tools:text="这一日，李淳罡再入陆地神仙境界。"
+                />
+            <TextView
+                android:id="@+id/item_book_list_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{bookItem.size}"
+                android:layout_below="@id/item_book_list_brief"
+                tools:text="3.32Mb"/>
+            <TextView
+                android:id="@+id/item_book_list_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{bookItem.progress}"
+                android:layout_below="@id/item_book_list_size"
 
-        </LinearLayout>
+                tools:text="已阅读11%"/>
+            <TextView
+                android:id="@+id/item_book_list_last_read_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{bookItem.lastReadTime}"
+                android:layout_below="@id/item_book_list_size"
+                android:layout_alignParentEnd="true"
+                tools:text="2020-12-1 13：11：21"/>
+
+
+        </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
 </layout>
