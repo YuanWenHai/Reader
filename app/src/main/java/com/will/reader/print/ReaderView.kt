@@ -12,9 +12,9 @@ class ReaderView(context: Context,private val printer: Printer,private val confi
 
 
     override fun onDraw(canvas: Canvas?) {
-        printer.fill().forEachIndexed{
-            index,line ->
-            canvas?.drawText(line,config.textMarginStart,(index * (config.textSize+config.textLineSpace)) + config.textMarginTop,paint)
+        canvas?.let {
+            printer.draw(it)
         }
+
     }
 }

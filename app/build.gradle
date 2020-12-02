@@ -46,6 +46,8 @@ dependencies {
     def fragment_version = "1.2.5"
     def recycler_version = "1.1.0"
     def card_view_version = "1.0.0"
+    def data_store_version = "1.0.0-alpha04"
+    def moshi_version = "1.11.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
@@ -70,9 +72,15 @@ dependencies {
     //recyclerview
     implementation "androidx.recyclerview:recyclerview:$recycler_version"
 
-
     //cardView
     implementation "androidx.cardview:cardview:$card_view_version"
+
+    //dataStore
+    implementation "androidx.datastore:datastore-preferences:$data_store_version"
+
+    //moshi
+    implementation("com.squareup.moshi:moshi:$moshi_version")
+
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
