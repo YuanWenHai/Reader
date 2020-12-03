@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 /**
  * created  by will on 2020/11/27 16:43
  */
-class BookRepository(private val bookDao: BookDao) {
+class BookRepository private constructor(private val bookDao: BookDao) {
 
     suspend fun saveBook(book: Book){
         withContext(IO){
@@ -29,4 +29,19 @@ class BookRepository(private val bookDao: BookDao) {
         return bookDao.getBookByPath(book.path) == null
     }
 
+    suspend fun updateBook(book: Book){
+        withContext(IO){
+            bookDao.updateBook(book)
+        }
+    }
+
+    companion object {
+        private var instance: BookRepository? = null
+
+        fun getInstance(bookDao: BookDao): BookRepository{
+            return instance ?: synchronized(this){
+                instance ?: BookRepository(bookDao).also { instance = it }
+            }
+        }
+    }
 }

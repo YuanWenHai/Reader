@@ -6,6 +6,7 @@ import android.util.DisplayMetrics
 import com.will.reader.data.model.Book
 import java.io.File
 import java.io.RandomAccessFile
+import java.lang.StringBuilder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
@@ -13,17 +14,83 @@ import java.nio.charset.Charset
 /**
  * created  by will on 2020/11/29 11:43
  */
-class Printer(private val book: Book,private val config: PrintConfig,private val screen: DisplayMetrics,private val paint: Paint){
+class Printer(private var book: Book,private var config: PrintConfig,private val screen: DisplayMetrics){
     private val bookFile = File(book.path)
     private val bookBytes: MappedByteBuffer
     private val byteChannel: FileChannel
     private var pageBegin = book.readProgressInByte
-    private var currentParagraphStart = 0
+    private var currentPosition = 0
+    private var lines: List<String> = mutableListOf()
+    private var paint: Paint
     init {
         val file = File(book.path)
         byteChannel = RandomAccessFile(file,"r").channel
         bookBytes = byteChannel.map(FileChannel.MapMode.READ_ONLY,0,file.length())
+        paint = generatePaint(config)
     }
+
+    /**
+     * 修改config参数，需重新调用print生效
+     */
+    fun setConfig(config: PrintConfig){
+        this.config = config
+        this.paint = generatePaint(config)
+    }
+
+    fun getCurrentBookStateForSave(): Book{
+        val readProgressInByte = pageBegin
+        val builder = StringBuilder()
+        lines.forEach{builder.append(it)}
+        val lastReadParagraph = builder.toString()
+        val lastReadTime = System.currentTimeMillis()
+        return book.copy(readProgressInByte = readProgressInByte,lastReadParagraph = lastReadParagraph,lastReadTime = lastReadTime)
+    }
+    fun setEncoding(encode: String){
+        this.book = book.copy(encode = encode)
+    }
+
+    /**
+     * 从当前page begin位置开始排版一页内容，并将current position 移动到下一页首个byte
+     */
+    fun print(){
+        val page = compose(pageBegin)
+        currentPosition = page.currentPosition
+        lines = page.lines
+    }
+
+    /**
+     * 从下一页首个byte位置开始排版一页内容，并将current position移动到排版后的下一页首个byte
+     */
+    fun pageDown(){
+        pageBegin = currentPosition
+        val page = compose(currentPosition)
+        currentPosition = page.currentPosition
+        lines = page.lines
+    }
+
+    /**
+     *从当前page begin位置上翻一页排版一页内容，并将page begin移动到当前页首个byte，current position为下一页首个byte
+     */
+    fun pageUp(){
+        val start = findLastPageBegin(pageBegin)
+        val page = compose(start)
+        pageBegin = start
+        currentPosition = page.currentPosition
+        lines = page.lines
+    }
+
+    fun draw(canvas: Canvas){
+        lines.forEachIndexed{
+                index, line ->
+            val x = config.textMarginStart
+            val y = config.textMarginTop + ((index+1)*(config.textSize+config.textLineSpace))
+            canvas.drawText(line,x,y,paint)
+        }
+    }
+
+
+
+
 
     /**
      * 将一段byte读为string
@@ -31,7 +98,11 @@ class Printer(private val book: Book,private val config: PrintConfig,private val
      * @param end 终止位置,exclusive
      */
     private fun readParagraphString(start: Int,end: Int): String{
-        val bytes = ByteArray(end-start)
+        val length = end - start
+        if(length <= 0){
+            return ""
+        }
+        val bytes = ByteArray(length)
         for (i in bytes.indices){
             bytes[i] = bookBytes.get(start+i)
         }
@@ -58,11 +129,10 @@ class Printer(private val book: Book,private val config: PrintConfig,private val
     }
 
     private fun findLastParagraphStartPos(currentStart: Int): Int{
-        val lf = 10.toByte() // \n
         if(currentStart == 0){
-            return -1
+            return 0
         }
-        // TODO: 2020/12/2  
+        val lf = 10.toByte() // \n
         for(i in currentStart downTo 0){
             if(i != currentStart-1 && bookBytes[i] == lf){
                 //当前i为段尾，+1为下一段首byte
@@ -103,50 +173,69 @@ class Printer(private val book: Book,private val config: PrintConfig,private val
                 return i
             }
         }
-        return text.length
+        return 0
     }
 
-    fun pageDown(): List<String>{
-        return compose()
-    }
-    fun pageUp(): List<String>{
+    /**
+     * 从后向前计算上一页begin position
+     */
+    private fun findLastPageBegin(currentPageBegin: Int): Int{
         val lineCount = measureLineCount(config,screen)
+        var paragraph = ""
+        var textIndex = 0
+        var mPosition = currentPageBegin
         for (i in 0 until lineCount){
-            val lastParagraphEndPos = findLastParagraphStartPos(currentParagraphStart)
-            val paragraphStr = readParagraphString(lastParagraphEndPos+1,currentParagraphStart+1)
+            if(textIndex == 0){
+                val lastParagraphStartPos = findLastParagraphStartPos(mPosition)
+                //已经到文件首部
+                if(lastParagraphStartPos == 0){
+                    mPosition = 0
+                    break
+                }
+                paragraph = readParagraphString(lastParagraphStartPos,mPosition)
+                textIndex = paragraph.length
+                mPosition = lastParagraphStartPos
+            }
+            textIndex = measureLineIndexBackward(paragraph.substring(0,textIndex),config,screen)
         }
+        if(textIndex != 0){
+            mPosition += paragraph.substring(0,textIndex).toByteArray(Charset.forName(book.encode)).size
+        }
+        return mPosition
     }
 
 
-    private fun compose(): List<String>{
+    private fun compose(start: Int): Page{
         val lineCount = measureLineCount(config,screen)
         val lines = mutableListOf<String>()
         var paragraph = ""
-        pageBegin = currentParagraphStart
+        var mPosition = start
         for(i in 0 until lineCount){
             if(paragraph.isEmpty()){
-                val newStart = findNextParagraphStartPos(currentParagraphStart)
+                val newStart = findNextParagraphStartPos(mPosition)
                 if(newStart == -1){
-                    return lines
+                    return Page(lines,mPosition)
                 }
-                paragraph = readParagraphString(currentParagraphStart,newStart)
-                currentParagraphStart = newStart
+                paragraph = readParagraphString(mPosition,newStart)
+                mPosition = newStart
             }
             val lineEnd = measureLineIndexForward(paragraph,config,screen)
             lines.add(paragraph.substring(0,lineEnd))
             paragraph = paragraph.substring(lineEnd,paragraph.length)
         }
         val offsetCorrection = paragraph.toByteArray(Charset.forName(book.encode)).size
-        currentParagraphStart -= offsetCorrection
-        return lines
+        mPosition -= offsetCorrection
+        return Page(lines,mPosition)
     }
 
-    fun draw(canvas: Canvas){
-        compose().forEachIndexed{
-            index, line ->
-            val x = config.textMarginStart
-            val y = config.textMarginTop + ((index+1)*(config.textSize+config.textLineSpace))
-            canvas.drawText(line,x,y,paint)
+
+    private fun generatePaint(config: PrintConfig): Paint{
+        return Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            textSize = config.textSize
         }
     }
+    private  data class Page(
+        val lines: List<String>,
+        val currentPosition: Int
+    )
 }

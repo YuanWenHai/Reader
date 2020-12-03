@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.will.reader.data.model.Book
 
 /**
@@ -26,4 +27,7 @@ interface BookDao {
 
     @Insert
     fun saveBook(bookList: List<Book>)
+
+    @Update
+    fun updateBook(book: Book)
 }

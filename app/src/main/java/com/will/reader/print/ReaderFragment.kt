@@ -18,10 +18,8 @@ class ReaderFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val book = arg.book.copy(encode = "gbk")
         val config = PrintConfig.default(requireContext())
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.textSize = config.textSize
-        val printer = Printer(book,config,resources.displayMetrics,paint)
-        val view = ReaderView(requireContext(),printer,config,paint)
+        val printer = Printer(book,config,resources.displayMetrics)
+        val view = ReaderView(requireContext(),printer)
         return view
     }
 }

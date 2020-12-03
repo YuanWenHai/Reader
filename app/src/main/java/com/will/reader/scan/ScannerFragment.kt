@@ -29,7 +29,7 @@ import java.io.File
  */
 class ScannerFragment: Fragment(){
     private val viewModel: ScannerViewModel by viewModels{
-        ScannerViewModelFactory(BookRepository(AppDataBase.getInstance(requireContext()).getBookDao()))
+        ScannerViewModelFactory(BookRepository.getInstance(AppDataBase.getInstance(requireContext()).getBookDao()))
     }
     override fun onCreateView(
         inflater: LayoutInflater,
