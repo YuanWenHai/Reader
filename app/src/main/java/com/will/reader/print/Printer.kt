@@ -30,11 +30,15 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     }
 
     /**
-     * 修改config参数，需重新调用print生效
+     * 修改config参数
      */
     fun setConfig(config: PrintConfig){
         this.config = config
         this.paint = generatePaint(config)
+        prepare()
+    }
+    fun getConfig(): PrintConfig{
+        return config
     }
 
     fun getCurrentBookStateForSave(): Book{
@@ -47,6 +51,10 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     }
     fun setEncoding(encode: String){
         this.book = book.copy(encode = encode)
+    }
+
+    fun prepare(){
+        print()
     }
 
     /**
@@ -151,7 +159,7 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     /**
      * 正序测量该行应使用text多少字，returned index is exclusive
      */
-    private fun measureLineIndexForward(text: String, config: PrintConfig, screen: DisplayMetrics): Int{
+    private fun measureLineIndexForward(text: String,  screen: DisplayMetrics): Int{
         val availableWidth = screen.widthPixels - config.textMarginStart - config.textMarginEnd
         paint.textSize = config.textSize
         for( i in 1 until text.length){
@@ -219,7 +227,7 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
                 paragraph = readParagraphString(mPosition,newStart)
                 mPosition = newStart
             }
-            val lineEnd = measureLineIndexForward(paragraph,config,screen)
+            val lineEnd = measureLineIndexForward(paragraph,screen)
             lines.add(paragraph.substring(0,lineEnd))
             paragraph = paragraph.substring(lineEnd,paragraph.length)
         }

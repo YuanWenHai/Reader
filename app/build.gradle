@@ -79,7 +79,7 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:$data_store_version"
 
     //moshi
-    implementation("com.squareup.moshi:moshi:$moshi_version")
+    implementation("com.squareup.moshi:moshi-kotlin:$moshi_version")
 
 
     testImplementation 'junit:junit:4.+'

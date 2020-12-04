@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.createDataStore
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -24,7 +25,7 @@ import java.io.OutputStream
  */
 class PrintConfigRepos private constructor(context: Context){
     private val dataStore: DataStore<Preferences>
-    private val jsonAdapter = Moshi.Builder().build().adapter(PrintConfig::class.java)
+    private val jsonAdapter = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build().adapter(PrintConfig::class.java)
     init {
         dataStore = context.createDataStore(DATA_STORE_NAME)
     }

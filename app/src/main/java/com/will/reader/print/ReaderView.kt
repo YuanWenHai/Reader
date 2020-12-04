@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -11,9 +12,11 @@ import android.view.View
 /**
  * created  by will on 2020/11/29 11:52
  */
-class ReaderView(context: Context,private val printer: Printer): View(context) {
+class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attributeSet) {
 
     private var clickFlag = false
+    private var printer: Printer? = null
+
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -32,29 +35,25 @@ class ReaderView(context: Context,private val printer: Printer): View(context) {
         return true
     }
 
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        printer.print()
+    fun setPrinter(printer: Printer){
+        this.printer = printer
     }
-
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.let {
-            printer.draw(it)
+            printer?.draw(it)
         }
     }
     fun refresh(){
-        printer.print()
         invalidate()
     }
 
     private fun performLeftClick(){
-        printer.pageUp()
+        printer?.pageUp()
         invalidate()
     }
     private fun performRightClick(){
-        printer.pageDown()
+        printer?.pageDown()
         invalidate()
     }
 
