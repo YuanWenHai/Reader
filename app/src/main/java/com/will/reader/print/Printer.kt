@@ -161,10 +161,9 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
      */
     private fun measureLineIndexForward(text: String,  screen: DisplayMetrics): Int{
         val availableWidth = screen.widthPixels - config.textMarginStart - config.textMarginEnd
-        paint.textSize = config.textSize
         for( i in 1 until text.length){
             if(paint.measureText(text.substring(0,i)) > availableWidth){
-                return i
+                return i - 1
             }
         }
         return text.length
@@ -175,13 +174,16 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
      */
     private fun measureLineIndexBackward(text: String,config: PrintConfig,screen: DisplayMetrics): Int{
         val availableWidth = screen.widthPixels - config.textMarginStart - config.textMarginEnd
-        paint.textSize = config.textSize
-        for(i in text.length-1 downTo  0){
-            if(paint.measureText(text.substring(i,text.length)) > availableWidth){
-                return i
+        var nextLineStart = 0
+        var temp: String
+        for(i in 1 .. text.length){
+            temp = text.substring(nextLineStart,i)
+            if(paint.measureText(temp) > availableWidth){
+                // TODO: 2020/12/5  bug 
+                nextLineStart = i
             }
         }
-        return 0
+        return nextLineStart
     }
 
     /**

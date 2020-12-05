@@ -59,6 +59,7 @@ class ReaderFragment: Fragment() {
     }
 
     private fun initView(binding: FragmentReaderBinding){
+        binding.fragmentReaderMenu.visibility = View.GONE
         binding.fragmentReaderTextSizeIncrease.setOnClickListener{
             viewModel.inCreaseTextSize(requireContext())
             binding.fragmentReaderView.refresh()
