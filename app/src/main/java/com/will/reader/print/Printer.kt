@@ -70,6 +70,9 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
      * 从下一页首个byte位置开始排版一页内容，并将current position移动到排版后的下一页首个byte
      */
     fun pageDown(){
+        if(currentPosition >= bookBytes.limit()){
+            return
+        }
         pageBegin = currentPosition
         val page = compose(currentPosition)
         currentPosition = page.currentPosition
@@ -117,13 +120,13 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
         return String(bytes,Charset.forName(book.encode))
     }
     /**
-     *寻找下一段末尾(/n)的byte位置,若已到文件末尾则返回文件长度
+     *寻找下一段末尾(/n)的byte位置,若已到文件末尾则返回-1
      * @param currentStart inclusive
      */
     private fun findNextParagraphStartPos(currentStart: Int): Int{
         val lf = 10.toByte()
         val cr = 13.toByte()
-        if(currentStart == bookBytes.limit()){
+        if(currentStart >= bookBytes.limit()){
             //reach the end
             return -1
         }
@@ -136,15 +139,25 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
         return bookBytes.limit()
     }
 
+    /**
+     * 在bytes文件当中根据换行符按序查询上一段落的起始byte position
+     * @return 上一段的起始byte position
+     */
     private fun findLastParagraphStartPos(currentStart: Int): Int{
         if(currentStart == 0){
             return 0
         }
+        val start = currentStart - 1
         val lf = 10.toByte() // \n
-        for(i in currentStart downTo 0){
-            if(i != currentStart-1 && bookBytes[i] == lf){
+        val cr = 13.toByte() // \r
+        for(i in start downTo 0){
+            if(i != start && bookBytes[i] == lf){
                 //当前i为段尾，+1为下一段首byte
-                return i+1
+                // TODO: 2020/12/8 bug
+                    if(bookBytes[i-1] == cr){
+                        return i - 1
+                    }
+                    return i+1
             }
         }
         return 0
@@ -157,7 +170,8 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     }
 
     /**
-     * 正序测量该行应使用text多少字，returned index is exclusive
+     * 正序测量该行尾Index，returned index is exclusive
+     * @return 第一行 end position
      */
     private fun measureLineIndexForward(text: String,  screen: DisplayMetrics): Int{
         val availableWidth = screen.widthPixels - config.textMarginStart - config.textMarginEnd
@@ -170,71 +184,112 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     }
 
     /**
-     * 倒序测量改行应使用text字数
+     * 倒序测量最后一行起始index
+     *
+     * ## 注意这里的代码逻辑
+     *
+     * 虽然是倒序测量，但并非literally从后向前测量，而是从前向后测量每行直到获得最后一行起始位置
+     *
+     * 这是为了保持前后翻页排版的一致性。
+     * @return 最后一行start index,若单行可以填充则返回0
      */
     private fun measureLineIndexBackward(text: String,config: PrintConfig,screen: DisplayMetrics): Int{
+        if(text.isEmpty()){
+            return 0
+        }
         val availableWidth = screen.widthPixels - config.textMarginStart - config.textMarginEnd
-        var nextLineStart = 0
+        var lineStart = 0
         var temp: String
         for(i in 1 .. text.length){
-            temp = text.substring(nextLineStart,i)
+            temp = text.substring(lineStart,i)
             if(paint.measureText(temp) > availableWidth){
-                // TODO: 2020/12/5  bug 
-                nextLineStart = i
+                lineStart = i - 1
             }
         }
-        return nextLineStart
+        return lineStart
     }
 
     /**
-     * 从后向前计算上一页begin position
+     * 从后向前计算上一页begin position，printer的核心方法之一
+     * @return 上一页起始position
      */
     private fun findLastPageBegin(currentPageBegin: Int): Int{
+        val lines = mutableListOf<String>()
         val lineCount = measureLineCount(config,screen)
+        //段落string
         var paragraph = ""
+        //每行使用段落的index
         var textIndex = 0
+        //byte position
         var mPosition = currentPageBegin
+        //循环需要的行数填充
         for (i in 0 until lineCount){
+            //若textIndex为0则说明本段paragraph已经打印完毕，再向前读取一个paragraph
             if(textIndex == 0){
                 val lastParagraphStartPos = findLastParagraphStartPos(mPosition)
-                //已经到文件首部
+                //已经到文件首部，直接返回0
                 if(lastParagraphStartPos == 0){
-                    mPosition = 0
-                    break
+                    return 0
                 }
+                //将bytes读为string，使用book中的encode
                 paragraph = readParagraphString(lastParagraphStartPos,mPosition)
-                textIndex = paragraph.length
+                //移动mPosition到当前位置
                 mPosition = lastParagraphStartPos
             }
-            textIndex = measureLineIndexBackward(paragraph.substring(0,textIndex),config,screen)
+            //测量当前屏幕参数中一行所需要的字数，因为是上翻页，所以这里的textIndex是最后一行的起始index
+            textIndex = measureLineIndexBackward(paragraph,config,screen)
+            //paragraph"打印"消耗了这段文字，剩余的paragraph进入下一循环进行打印
+            val line = paragraph.substring(textIndex,paragraph.length)
+            lines.add(0,line)
+            paragraph = paragraph.substring(0, textIndex)
         }
+        //当所有行都填充完毕后，若textIndex不为0则说明paragraph未全部使用，需要在byte position中补正
         if(textIndex != 0){
+            //方式很简单，string encoding为byte，依旧使用book中的encode
             mPosition += paragraph.substring(0,textIndex).toByteArray(Charset.forName(book.encode)).size
         }
+        //返回计算出的Position
         return mPosition
     }
 
 
+    /**
+     * 从前向后阅读一页，printer的核心方法之一
+     * @return Page,包含已读取的页面内容以及读取本页后的byte position
+     */
     private fun compose(start: Int): Page{
+        //获取页面行数
         val lineCount = measureLineCount(config,screen)
         val lines = mutableListOf<String>()
+        //段落string
         var paragraph = ""
+        //byte position
         var mPosition = start
+        //循环填充
         for(i in 0 until lineCount){
+            //若paragraph为空，则向后读取一个byte paragraph并读为string
             if(paragraph.isEmpty()){
                 val newStart = findNextParagraphStartPos(mPosition)
+                //若newStart为-1，则说明当前mPosition已到达文件limit，直接返回已有内容
                 if(newStart == -1){
                     return Page(lines,mPosition)
                 }
                 paragraph = readParagraphString(mPosition,newStart)
+                //byte position后移
                 mPosition = newStart
             }
+            //测量本行需要使用paragraph中多少字
             val lineEnd = measureLineIndexForward(paragraph,screen)
             lines.add(paragraph.substring(0,lineEnd))
+            //更新paragraph，因为“使用”了一行
             paragraph = paragraph.substring(lineEnd,paragraph.length)
         }
-        val offsetCorrection = paragraph.toByteArray(Charset.forName(book.encode)).size
-        mPosition -= offsetCorrection
+        //若行排版完毕paragraph仍有剩余，则需要byte position补正
+        if(paragraph.isNotEmpty()){
+            val offsetCorrection = paragraph.toByteArray(Charset.forName(book.encode)).size
+            mPosition -= offsetCorrection
+        }
+
         return Page(lines,mPosition)
     }
 
