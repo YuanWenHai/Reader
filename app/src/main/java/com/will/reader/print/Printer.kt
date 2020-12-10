@@ -1,15 +1,21 @@
 package com.will.reader.print
 
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.BatteryManager
 import android.util.DisplayMetrics
 import com.will.reader.data.model.Book
+import com.will.reader.util.getFormattedTime
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.StringBuilder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
+import kotlin.math.roundToInt
 
 /**
  * created  by will on 2020/11/29 11:43
@@ -31,12 +37,12 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
 
     /**
      * 修改config参数
-     */
+     *//*
     fun setConfig(config: PrintConfig){
         this.config = config
         this.paint = generatePaint(config)
         prepare()
-    }
+    }*/
     fun getConfig(): PrintConfig{
         return config
     }
@@ -49,56 +55,111 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
         val lastReadTime = System.currentTimeMillis()
         return book.copy(readProgressInByte = readProgressInByte,lastReadParagraph = lastReadParagraph,lastReadTime = lastReadTime)
     }
+
     fun setEncoding(encode: String){
         this.book = book.copy(encode = encode)
     }
 
-    fun prepare(){
-        print()
+    fun printWithNewConfig(context: Context,config: PrintConfig): PrinterPage{
+        this.config = config
+        this.paint = generatePaint(config)
+        return print(context)
     }
 
     /**
      * 从当前page begin位置开始排版一页内容，并将current position 移动到下一页首个byte
      */
-    fun print(){
+    fun print(context: Context): PrinterPage{
         val page = compose(pageBegin)
         currentPosition = page.currentPosition
         lines = page.lines
+        return generatePrinterPage(context,page)
     }
 
     /**
      * 从下一页首个byte位置开始排版一页内容，并将current position移动到排版后的下一页首个byte
      */
-    fun pageDown(){
+    fun pageDown(context: Context): PrinterPage?{
         if(currentPosition >= bookBytes.limit()){
-            return
+            return null
         }
         pageBegin = currentPosition
         val page = compose(currentPosition)
         currentPosition = page.currentPosition
         lines = page.lines
+        return generatePrinterPage(context,page)
     }
 
     /**
      *从当前page begin位置上翻一页排版一页内容，并将page begin移动到当前页首个byte，current position为下一页首个byte
      */
-    fun pageUp(){
+    fun pageUp(context: Context): PrinterPage? {
+        if(pageBegin == 0){
+            return null
+        }
         val start = findLastPageBegin(pageBegin)
         val page = compose(start)
         pageBegin = start
         currentPosition = page.currentPosition
         lines = page.lines
+        return generatePrinterPage(context,page)
     }
 
-    fun draw(canvas: Canvas){
+    fun draw(canvas: Canvas,context: Context){
+        canvas.drawColor(config.backgroundColor)
         lines.forEachIndexed{
                 index, line ->
             val x = config.textMarginStart
             val y = config.textMarginTop + ((index+1)*(config.textSize+config.textLineSpace))
             canvas.drawText(line,x,y,paint)
         }
+        drawBottomBar(canvas,context)
     }
 
+    private fun drawBottomBar(canvas: Canvas,context: Context){
+        val bottomBarTextSize = config.bottomBarHeight * 0.66f
+        val y = screen.heightPixels - (config.bottomBarHeight * 0.34f)
+
+        val timeText = "\uD83D\uDD52${getFormattedTime("HH:mm")}"
+        val batteryStatus = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let {
+            context.registerReceiver(null,it)
+        }
+        val batteryLevelText = batteryStatus?.let {
+            val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL,-1)
+            val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE,-1)
+            val percentage = level*100/scale.toFloat()
+            "\uD83D\uDD0B${percentage.roundToInt()}%"
+        } ?: ""
+        val progress = currentPosition*100/bookFile.length().toFloat()
+        val progressText = "%.3f".format(progress).plus("%")
+        paint.textSize = bottomBarTextSize
+        //draw battery level text
+        canvas.drawText(batteryLevelText,config.textMarginStart,y,paint)
+        //draw progress text
+        val progressX = (screen.widthPixels - paint.measureText(progressText)) * 0.5f
+        canvas.drawText(progressText,progressX,y,paint)
+        //draw time text
+        val timeX = screen.widthPixels - config.textMarginEnd - paint.measureText(timeText)
+        canvas.drawText(timeText,timeX,y,paint)
+        paint.textSize = config.textSize
+
+    }
+
+    private fun generatePrinterPage(context: Context,page: Page): PrinterPage{
+        val timeText = "\uD83D\uDD52${getFormattedTime("HH:mm")}"
+        val progress = page.currentPosition*100/bookFile.length().toFloat()
+        val progressText = "%.3f".format(progress).plus("%")
+        val batteryStatus = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let {
+            context.registerReceiver(null,it)
+        }
+        val batteryLevelText = batteryStatus?.let {
+            val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL,-1)
+            val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE,-1)
+            val percentage = level*100/scale.toFloat()
+            "\uD83D\uDD0B${percentage.roundToInt()}%"
+        } ?: ""
+        return PrinterPage(page.lines,batteryText = batteryLevelText,progressText = progressText,timeText = timeText)
+    }
 
 
 
@@ -152,11 +213,6 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
         val cr = 13.toByte() // \r
         for(i in start downTo 0){
             if(i != start && bookBytes[i] == lf){
-                //当前i为段尾，+1为下一段首byte
-                // TODO: 2020/12/8 bug
-                    if(bookBytes[i-1] == cr){
-                        return i - 1
-                    }
                     return i+1
             }
         }
@@ -176,6 +232,10 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     private fun measureLineIndexForward(text: String,  screen: DisplayMetrics): Int{
         val availableWidth = screen.widthPixels - config.textMarginStart - config.textMarginEnd
         for( i in 1 until text.length){
+            //测量行长度时，忽略cr与lf，避免当\r\n出现在行尾时发生拆分，导致排版多出一行的问题
+            if(text[i-1] == '\r' || text[i-1] == '\n'){
+                continue
+            }
             if(paint.measureText(text.substring(0,i)) > availableWidth){
                 return i - 1
             }
@@ -190,6 +250,8 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
      *
      * 虽然是倒序测量，但并非literally从后向前测量，而是从前向后测量每行直到获得最后一行起始位置
      *
+     * 这里还忽略了lf与cr的measure长度，是为了避免错误的拆分
+     *
      * 这是为了保持前后翻页排版的一致性。
      * @return 最后一行start index,若单行可以填充则返回0
      */
@@ -201,6 +263,10 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
         var lineStart = 0
         var temp: String
         for(i in 1 .. text.length){
+            //测量行长度时，忽略cr与lf，避免当\r\n出现在行尾时发生拆分，导致排版多出一行的问题
+            if(text[i-1] == '\r' || text[i-1] == '\n'){
+                continue
+            }
             temp = text.substring(lineStart,i)
             if(paint.measureText(temp) > availableWidth){
                 lineStart = i - 1
@@ -214,7 +280,6 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
      * @return 上一页起始position
      */
     private fun findLastPageBegin(currentPageBegin: Int): Int{
-        val lines = mutableListOf<String>()
         val lineCount = measureLineCount(config,screen)
         //段落string
         var paragraph = ""
@@ -239,8 +304,6 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
             //测量当前屏幕参数中一行所需要的字数，因为是上翻页，所以这里的textIndex是最后一行的起始index
             textIndex = measureLineIndexBackward(paragraph,config,screen)
             //paragraph"打印"消耗了这段文字，剩余的paragraph进入下一循环进行打印
-            val line = paragraph.substring(textIndex,paragraph.length)
-            lines.add(0,line)
             paragraph = paragraph.substring(0, textIndex)
         }
         //当所有行都填充完毕后，若textIndex不为0则说明paragraph未全部使用，需要在byte position中补正
@@ -302,5 +365,11 @@ class Printer(private var book: Book,private var config: PrintConfig,private val
     private  data class Page(
         val lines: List<String>,
         val currentPosition: Int
+    )
+    data class PrinterPage(
+        val lines: List<String>,
+        val batteryText: String,
+        val progressText: String,
+        val timeText: String
     )
 }

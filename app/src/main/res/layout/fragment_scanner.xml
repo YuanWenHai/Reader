@@ -3,7 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:background="@color/colorPrimary"
+        >
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/fragment_scanner_toolbar"
             android:layout_width="match_parent"
@@ -14,6 +17,7 @@
             android:id="@+id/fragment_scanner_cursor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/white"
             android:maxLines="1"
             android:layout_below="@id/fragment_scanner_toolbar"/>
         <androidx.recyclerview.widget.RecyclerView
@@ -21,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/fragment_scanner_cursor"
+            android:background="@color/white"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             />
 

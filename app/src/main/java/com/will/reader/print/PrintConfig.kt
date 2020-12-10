@@ -27,7 +27,8 @@ data class PrintConfig(
     fun increaseTextSize(density: Float): PrintConfig{
         val increase = 2 * density // 2sp
         val newValue = min(textSize + increase,40 * density) // maximum size is 40sp
-        return this.copy(textSize = newValue)
+        val lineSpace = newValue/3
+        return this.copy(textSize = newValue,textLineSpace = lineSpace)
     }
 
     /**
@@ -36,7 +37,8 @@ data class PrintConfig(
     fun decreaseTextSize(density: Float): PrintConfig{
         val decrease = 2* density //2sp
         val newValue = max(textSize - decrease,8 * density)// minimum size is 8 sp
-        return this.copy(textSize = newValue)
+        val lineSpace = newValue/3
+        return this.copy(textSize = newValue,textLineSpace = lineSpace)
     }
 
     companion object{
@@ -51,7 +53,7 @@ data class PrintConfig(
             val marginEnd = 12 * density
             val marginTop = 12 * density
             val marginBottom = 12 * density
-            val textLineSpace = 10 * density
+            val textLineSpace = textSize/3
             val bottomBarHeight = 24 * density
             val textColor = Color.BLACK
             val backgroundColor = Color.WHITE

@@ -3,6 +3,9 @@ package com.will.reader.util
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -32,4 +35,8 @@ fun byteSizeToFormattedString(size: Long): String{
     val str = "%.2f".format(result)
     return "$str ${units[index]}"
 
+}
+fun getFormattedTime(pattern: String): String{
+    val formatter = SimpleDateFormat(pattern, Locale.CHINA)
+    return formatter.format(Date(System.currentTimeMillis()))
 }
