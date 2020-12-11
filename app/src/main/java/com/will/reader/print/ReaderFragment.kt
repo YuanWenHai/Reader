@@ -8,10 +8,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.will.reader.R
 import com.will.reader.data.AppDataBase
 import com.will.reader.data.BookRepository
+import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentReaderBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -22,7 +24,11 @@ import kotlinx.coroutines.launch
 class ReaderFragment: Fragment() {
     private val viewModel: PrintViewModel by viewModels{
         PrintViewModelFactory(
-            BookRepository.getInstance(AppDataBase.getInstance(requireContext()).getBookDao()))
+            arg.book.copy(encode = "gbk"),
+            BookRepository.getInstance(AppDataBase.getInstance(requireContext()).getBookDao()),
+            ChapterRepository.getInstance(AppDataBase.getInstance(requireContext()).getChapterDao())
+        )
+
     }
     private val arg: ReaderFragmentArgs by navArgs()
     private var menuClickFlag = false
@@ -34,23 +40,27 @@ class ReaderFragment: Fragment() {
             PrintConfigRepos.getInstance(requireContext()).get(requireContext().resources.displayMetrics.density).collectLatest {
                 config ->
                 binding.fragmentReaderView.setConfig(config)
-                viewModel.initializePrinter(requireContext(),arg.book.copy(encode = "gbk"),config, resources.displayMetrics)
-                initViewCurrentValue(binding,config)
+                viewModel.resetPage(requireContext(),config)
+                binding.fragmentReaderTextSize.text = getString(R.string.current_text_size).plus("${config.textSize}")
             }
         }
-        initView(binding)
+        initViewClickEvent(binding)
+        observeData(binding)
         return binding.root
     }
 
 
-    private fun initViewCurrentValue(binding: FragmentReaderBinding, config: PrintConfig){
-        binding.fragmentReaderTextSize.text = getString(R.string.current_text_size).plus("${config.textSize}")
+    private fun observeData(binding: FragmentReaderBinding){
+        viewModel.currentChapter().observe(viewLifecycleOwner){
+            binding.fragmentReaderChapterText.text = it
+        }
+        viewModel.page().observe(viewLifecycleOwner){
+            binding.fragmentReaderView.submitContent(it)
+        }
     }
 
-    private fun initView(binding: FragmentReaderBinding){
-        viewModel.printerPage().observe(viewLifecycleOwner){
-            binding.fragmentReaderView.submitPage(it)
-        }
+
+    private fun initViewClickEvent(binding: FragmentReaderBinding){
 
         binding.fragmentReaderView.setOnClickListener {
             which ->
@@ -80,11 +90,16 @@ class ReaderFragment: Fragment() {
         binding.fragmentReaderTextSizeDecrease.setOnClickListener{
             viewModel.decreaseTextSize(requireContext())
         }
+
+        binding.fragmentReaderChapterButton.setOnClickListener{
+            findNavController().navigate(ReaderFragmentDirections.actionReaderFragmentToChapterListFragment(arg.book))
+        }
     }
     private fun changeMenuState(menu: View){
         menuClickFlag = !menuClickFlag
         menu.visibility = if(menuClickFlag) View.VISIBLE else View.GONE
     }
+
 
     override fun onResume() {
         super.onResume()

@@ -16,4 +16,10 @@ data class Chapter(
     val positionInByte: Int,
     val charCount: Int
 ) {
+    companion object{
+        fun build(name: String, number: Int,positionInByte: Int,charCount: Int,bookId: Int): Chapter{
+            val id = System.currentTimeMillis()
+            // TODO: 2020/12/11 sync?
+        }
+    }
 }

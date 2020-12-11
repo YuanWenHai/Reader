@@ -38,11 +38,13 @@
                     android:layout_margin="3dp"
                     android:gravity="center_vertical">
                     <TextView
+                        android:id="@+id/fragment_reader_chapter_text"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         tools:text="当前章节：231.请老祖宗赴死" />
                     <Button
+                        android:id="@+id/fragment_reader_chapter_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/colorPrimaryLight"

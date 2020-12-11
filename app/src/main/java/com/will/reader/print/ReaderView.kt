@@ -2,13 +2,18 @@ package com.will.reader.print
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.BatteryManager
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.will.reader.util.LOG_TAG
+import com.will.reader.util.getFormattedTime
+import kotlin.math.roundToInt
 
 /**
  * created  by will on 2020/11/29 11:52
@@ -18,7 +23,7 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
     private var clickFlag = false
     private var onClick: ((which: Int) -> Unit)? = null
     private var printConfig: PrintConfig? = null
-    private var printerPage: Printer.PrinterPage? = null
+    private var mContent = Content(emptyList(),"","","")
     private var mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
 
@@ -43,12 +48,12 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
         this.printConfig = config
         this.mPaint.textSize = config.textSize
     }
-    fun submitPage(page: Printer.PrinterPage){
+    fun submitContent(content: Content){
         if(printConfig == null){
             Log.e(LOG_TAG,"must invoke setConfig before")
             return
         }
-        this.printerPage = page
+        mContent = content
         invalidate()
     }
 
@@ -58,26 +63,25 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
     }
 
     override fun onDraw(canvas: Canvas?) {
-        if(canvas != null && printConfig != null && printerPage != null){
+        if(canvas != null && printConfig != null){
             val config: PrintConfig = printConfig!!
-            val page: Printer.PrinterPage = printerPage!!
             canvas.drawColor(config.backgroundColor)
-            page.lines.forEachIndexed{
+            mContent.lines.forEachIndexed{
                     index, line ->
                 val x = config.textMarginStart
                 val y = config.textMarginTop + ((index+1)*(config.textSize+config.textLineSpace))
                 canvas.drawText(line,x,y,mPaint)
             }
-            drawBottomBar(canvas,config,page)
+            drawBottomBar(canvas,config,mContent)
         }
     }
 
-    private fun drawBottomBar(canvas: Canvas,config: PrintConfig,page: Printer.PrinterPage){
+    private fun drawBottomBar(canvas: Canvas,config: PrintConfig,content: Content){
         val bottomBarTextSize = config.bottomBarHeight * 0.66f
         val y = height - (config.bottomBarHeight * 0.34f)
-        val timeText = page.timeText
-        val batteryLevelText = page.batteryText
-        val progressText = page.progressText
+        val timeText = content.time
+        val batteryLevelText = content.batteryLevel
+        val progressText = content.progress
         mPaint.textSize = bottomBarTextSize
         //draw battery level text
         canvas.drawText(batteryLevelText,config.textMarginStart,y,mPaint)
@@ -91,6 +95,8 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
 
     }
 
+
+
     private fun handleActonUp(event: MotionEvent) {
         val viewWidth = width
         when (event.x) {
@@ -99,6 +105,13 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
             else -> onClick?.let { it(CENTER_CLICK) }
         }
     }
+
+    data class Content(
+        val lines: List<String>,
+        val time: String,
+        val progress: String,
+        val batteryLevel: String
+    )
     companion object {
         const val LEFT_CLICK = 0
         const val CENTER_CLICK = 1

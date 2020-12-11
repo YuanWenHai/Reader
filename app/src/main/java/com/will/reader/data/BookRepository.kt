@@ -1,5 +1,6 @@
 package com.will.reader.data
 
+import androidx.paging.PagingSource
 import com.will.reader.data.model.Book
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
@@ -33,6 +34,15 @@ class BookRepository private constructor(private val bookDao: BookDao) {
         withContext(IO){
             bookDao.updateBook(book)
         }
+    }
+
+    suspend fun deleteBook(book: Book){
+        withContext(IO){
+            bookDao.deleteBook(book)
+        }
+    }
+    fun bookInPaging(): PagingSource<Int,Book>{
+        return bookDao.getAllBookInPage()
     }
 
     companion object {

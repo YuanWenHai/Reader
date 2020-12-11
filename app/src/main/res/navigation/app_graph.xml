@@ -25,5 +25,16 @@
         <argument
             android:name="book"
             app:argType="com.will.reader.data.model.Book" />
+        <action
+            android:id="@+id/action_readerFragment_to_chapterListFragment"
+            app:destination="@id/chapterListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/chapterListFragment"
+        android:name="com.will.reader.chapterList.ChapterListFragment"
+        android:label="ChapterListFragment" >
+        <argument
+            android:name="book"
+            app:argType="com.will.reader.data.model.Book"/>
     </fragment>
 </navigation>

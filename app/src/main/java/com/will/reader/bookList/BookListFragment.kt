@@ -1,32 +1,33 @@
 package com.will.reader.bookList
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.paging.CombinedLoadStates
 import com.will.reader.R
 import com.will.reader.bookList.viewmodel.BookListViewModel
 import com.will.reader.bookList.viewmodel.BookViewModelFactory
 import com.will.reader.data.AppDataBase
+import com.will.reader.data.BookRepository
+import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentBookListBinding
-import com.will.reader.print.ReaderFragment
-import com.will.reader.print.ReaderFragmentArgs
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * created  by will on 2020/11/22 12:15
  */
 class BookListFragment: Fragment() {
     private val viewModel: BookListViewModel by viewModels{
-        BookViewModelFactory(AppDataBase.getInstance(requireContext()).getBookDao())
+        val appDb =  AppDataBase.getInstance(requireContext())
+        BookViewModelFactory(
+            BookRepository.getInstance(appDb.getBookDao()),
+            ChapterRepository.getInstance(appDb.getChapterDao())
+        )
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,7 +43,13 @@ class BookListFragment: Fragment() {
         val parent = activity as AppCompatActivity
         parent.setSupportActionBar(binding.bookListToolbar)
         val adapter = BookListAdapter{
-            findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment(it))
+            if(viewModel.checkBook(it)){
+                findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment(it))
+            }else{
+                Toast.makeText(requireContext(),"该书籍已不存在！",Toast.LENGTH_LONG).show()
+                viewModel.deleteBook(it)
+            }
+
         }
         binding.bookListRecycler.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
