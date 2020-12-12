@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.io.File
 import java.io.Serializable
+import java.util.*
 
 /**
  * created  by will on 2020/11/22 10:33
@@ -27,10 +28,10 @@ data class Book(
                         return build(File(path))
                 }
                 fun build(file: File): Book{
-                        val id = System.currentTimeMillis()
+                        val id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE
                         val name = file.name
                         val path = file.path
-                        val encode = ""
+                        val encode = "GBK"
                         val brief = ""
                         val size = file.length()
                         val charCount = 0
@@ -38,8 +39,17 @@ data class Book(
                         val lastReadTime = 0L
                         val lastReadParagraph = ""
                         return Book(
-                                id = id,name = name,path = path, encode = encode, brief = brief, size = size, charCount = charCount,
-                                readProgressInByte = readProgressInByte, lastReadTime = lastReadTime,lastReadParagraph = lastReadParagraph)
+                                id = id,
+                                name = name,
+                                path = path,
+                                encode = encode,
+                                brief = brief,
+                                size = size,
+                                charCount = charCount,
+                                readProgressInByte = readProgressInByte,
+                                lastReadTime = lastReadTime,
+                                lastReadParagraph = lastReadParagraph
+                        )
                 }
         }
 }

@@ -28,14 +28,24 @@
                    android:id="@+id/fragment_chapter_list_empty_msg"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
-                   android:text="@string/chapter_empty" />
-               <Button
-                   android:id="@+id/fragment_chapter_list_add_button"
+                   android:text="@string/chapter_empty"
+                   android:visibility="gone"/>
+               <LinearLayout
                    android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:text="@string/chapter_add"
-                   android:backgroundTint="@color/colorPrimaryLight"
-                   />
+                   android:layout_height="wrap_content">
+                   <Button
+                       android:id="@+id/fragment_chapter_list_add_button"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:text="@string/chapter_add"
+                       android:backgroundTint="@color/colorPrimaryLight"
+                       />
+                   <Spinner
+                       android:id="@+id/fragment_chapter_list_index_type"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="bottom"/>
+               </LinearLayout>
            </LinearLayout>
            <androidx.recyclerview.widget.RecyclerView
                android:id="@+id/fragment_chapter_list_recycler"
