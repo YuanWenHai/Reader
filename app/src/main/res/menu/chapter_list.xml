@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_chapter_add"
+        android:title="@string/chapter_add"
+        android:icon="@drawable/search_dark"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/menu_chapter_delete"
+        android:title="@string/chapter_delete"
+        app:showAsAction="never"/>
+</menu>

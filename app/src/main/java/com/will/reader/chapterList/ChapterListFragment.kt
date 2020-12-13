@@ -2,39 +2,40 @@ package com.will.reader.chapterList
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import com.will.reader.R
+import com.will.reader.base.BaseFragment
 import com.will.reader.chapterList.viewmodel.ChapterListViewModel
 import com.will.reader.chapterList.viewmodel.ChapterListViewModelFactory
 import com.will.reader.data.AppDataBase
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentChapterListBinding
 import com.will.reader.util.LOG_TAG
+import com.will.reader.util.makeLongToast
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * created  by will on 2020/12/11 15:53
  */
-class ChapterListFragment: Fragment() {
+class ChapterListFragment: BaseFragment() {
     private val viewModel: ChapterListViewModel by viewModels{
         ChapterListViewModelFactory(
             args.book,
             ChapterRepository.getInstance(AppDataBase.getInstance(requireContext()).getChapterDao())
         )
     }
-
     private val args: ChapterListFragmentArgs by navArgs()
+    private var keyword = "章"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,42 +48,62 @@ class ChapterListFragment: Fragment() {
     }
 
     private fun initView(binding: FragmentChapterListBinding){
-        val adapter = ChapterListAdapter()
-        binding.fragmentChapterListToolbar.title = args.book.name
-        binding.fragmentChapterListRecycler.adapter = adapter
-        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            viewModel.chapterFlow.collectLatest {
-                adapter.submitData(it)
-            }
-            adapter.loadStateFlow.collectLatest {
-                binding.fragmentChapterListRecycler.visibility = if(adapter.itemCount == 0) View.INVISIBLE else View.VISIBLE
-            }
-        }
+        setHasOptionsMenu(true)
         val parent = requireActivity() as AppCompatActivity
         parent.setSupportActionBar(binding.fragmentChapterListToolbar)
         parent.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.fragmentChapterListToolbar.setNavigationOnClickListener{parent.onBackPressed()}
 
-        val spinnerAdapter = ArrayAdapter.createFromResource(requireContext(),R.array.chapter_indexing_type,android.R.layout.simple_spinner_dropdown_item)
-        binding.fragmentChapterListIndexType.adapter = spinnerAdapter
-        binding.fragmentChapterListIndexType.gravity = Gravity.END
-        binding.fragmentChapterListAddButton.setOnClickListener {
-            /*viewLifecycleOwner.lifecycleScope.launch {
-                ChapterFinder(args.book).indexing().collect {
-                    val pos = it?.positionInByte ?: args.book.size.toInt()
-                    val progress = pos*100f/args.book.size
-                    Log.e(LOG_TAG,progress.toString())
+
+        val adapter = ChapterListAdapter()
+        binding.fragmentChapterListToolbar.title = args.book.name
+        binding.fragmentChapterListRecycler.adapter = adapter
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.chapterFlow.collectLatest {
+                adapter.submitData(it)
+            }
+
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            adapter.loadStateFlow.collectLatest {
+                if(it.refresh is LoadState.NotLoading){
+                    binding.fragmentChapterListRecycler.visibility = if(adapter.itemCount == 0) View.INVISIBLE else View.VISIBLE
                 }
             }
-*/
-            ProgressBarDialogFragment().show(parentFragmentManager,"progress bar")
+        }
+
+        binding.fragmentChapterListIndexType.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                keyword = resources.getStringArray(R.array.chapter_indexing_type)[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+        binding.fragmentChapterListAddButton.setOnClickListener {
+            ChapterIndexingFragment.get(args.book,keyword).show(parentFragmentManager,"progress_bar")
         }
     }
-    private fun showIndexingTypeDialog(){
-        val items = requireContext().resources.getStringArray(R.array.chapter_indexing_type)
-        AlertDialog.Builder(requireContext())
-            .setTitle("搜索章节")
-            .setItems(items.map {"按${it}搜索"}.toTypedArray()) { dialog, which -> Log.e(LOG_TAG,items[which]) }
-            .create().show()
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.chapter_list,menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.menu_chapter_add){
+            ChapterIndexingFragment.get(args.book,keyword).show(parentFragmentManager,"progress_bar")
+        }else if(item.itemId == R.id.menu_chapter_delete){
+            viewModel.deleteAllChapter()
+            makeLongToast(requireContext(),"已删除章节信息")
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

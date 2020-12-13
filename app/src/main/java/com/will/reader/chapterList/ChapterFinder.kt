@@ -1,12 +1,10 @@
 package com.will.reader.chapterList
 
-import android.util.Log
 import com.will.reader.data.model.Book
 import com.will.reader.data.model.Chapter
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.*
@@ -22,8 +20,9 @@ class ChapterFinder(private val book: Book) {
 
 
 
-    suspend fun indexing(): Flow<Chapter?> = flow{
+    suspend fun indexing(keyword: String): Flow<FindResult> = flow{
         val bookFile = File(book.path)
+        val regex = Regex("第[(0-9)零一二三四五六七八九十百千万]*${keyword}.*")
         if(bookFile.isFile){
             withContext(IO){
                 val fi = FileInputStream(bookFile)
@@ -34,24 +33,31 @@ class ChapterFinder(private val book: Book) {
                 var currentPos = 0
                 var current: Chapter
                 var previous: Chapter? = null
+                var emittedBytes = 0
+                val emitThreshold = 1024 * 10 //每10kb提交一次progress
                 while (currentPos < bookFile.length()){
                     val line = readLine(currentPos,bytes)
                     charCount += line.text.length
                     if(regex.matches(line.text)){
                         current = Chapter.build(line.text,number,currentPos,0,book.id)
                         previous?.let {
-                            emit(it.copy(charCount = charCount))
+                            emit(FindResult.Find(it.copy(charCount = charCount)))
                             charCount = 0
                         }
                         previous = current
                         number++
                     }
+                    emittedBytes += line.nextLineStart - currentPos
+                    if(emittedBytes > emitThreshold){
+                        emit(FindResult.Progress(currentPos*100/bookFile.length().toInt()))
+                        emittedBytes = 0
+                    }
                     currentPos = line.nextLineStart
                 }
                 previous?.let {
-                    emit(it.copy(charCount = charCount))
+                    emit(FindResult.Find(it.copy(charCount = charCount)))
                 }
-                emit(null)
+                emit(FindResult.Finish)
                 channel.close()
                 fi.close()
             }
@@ -122,4 +128,10 @@ class ChapterFinder(private val book: Book) {
         val text: String,
         val nextLineStart: Int
     )
+
+    sealed class FindResult{
+        data class Find(val chapter: Chapter): FindResult()
+        data class Progress(val progress: Int): FindResult()
+        object Finish : FindResult()
+    }
 }

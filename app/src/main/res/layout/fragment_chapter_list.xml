@@ -18,40 +18,54 @@
            android:layout_height="match_parent"
            android:background="@color/white">
            <LinearLayout
+               android:id="@+id/fragment_chapter_index_layout_search"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_centerInParent="true"
                android:orientation="vertical"
                android:gravity="center_horizontal"
+               android:visibility="gone"
                >
-               <TextView
+              <!-- <TextView
                    android:id="@+id/fragment_chapter_list_empty_msg"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:text="@string/chapter_empty"
-                   android:visibility="gone"/>
+                  />-->
                <LinearLayout
                    android:layout_width="wrap_content"
-                   android:layout_height="wrap_content">
-                   <Button
-                       android:id="@+id/fragment_chapter_list_add_button"
+                   android:layout_height="48dp"
+                   >
+                   <TextView
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:text="@string/chapter_add"
-                       android:backgroundTint="@color/colorPrimaryLight"
-                       />
+                       android:layout_height="match_parent"
+                       android:gravity="center"
+                       android:textColor="@color/black"
+                       android:textSize="16sp"
+                       android:text="@string/chapter_index_by"/>
                    <Spinner
                        android:id="@+id/fragment_chapter_list_index_type"
                        android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:layout_gravity="bottom"/>
+                       android:layout_height="match_parent"
+                       android:layout_gravity="bottom"
+                       android:entries="@array/chapter_indexing_type"
+                       android:theme="@style/ChapterIndexingSpinner"
+                       />
+                   <Button
+                       android:id="@+id/fragment_chapter_list_add_button"
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:text="@string/chapter_add"
+                       android:backgroundTint="@color/colorPrimaryLight"
+                       />
+
                </LinearLayout>
            </LinearLayout>
            <androidx.recyclerview.widget.RecyclerView
                android:id="@+id/fragment_chapter_list_recycler"
                android:layout_width="match_parent"
                android:layout_height="match_parent"
-               android:visibility="invisible"
+               android:background="@color/white"
                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
        </RelativeLayout>
     </LinearLayout>

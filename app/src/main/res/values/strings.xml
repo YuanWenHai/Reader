@@ -14,5 +14,7 @@
     <string name="text_increase">增大</string>
     <string name="text_decrease">缩小</string>
     <string name="chapter_empty">尚未发现章节，点此索引</string>
-    <string name="chapter_add">索引目录</string>
+    <string name="chapter_add">索引</string>
+    <string name="chapter_delete">删除章节信息</string>
+    <string name="chapter_index_by">根据关键字</string>
 </resources>

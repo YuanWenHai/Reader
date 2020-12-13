@@ -2,8 +2,8 @@
 <resources>
     <dimen name="toolbar_height">56dp</dimen>
     <array name="chapter_indexing_type">
-        <item>节</item>
         <item>章</item>
+        <item>节</item>
         <item>集</item>
         <item>回</item>
     </array>

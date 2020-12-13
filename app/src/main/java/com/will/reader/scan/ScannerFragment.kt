@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.will.reader.R
+import com.will.reader.base.BaseFragment
 import com.will.reader.data.AppDataBase
 import com.will.reader.data.BookRepository
 import com.will.reader.databinding.FragmentScannerBinding
@@ -27,7 +28,7 @@ import java.io.File
 /**
  * created  by will on 2020/11/22 16:59
  */
-class ScannerFragment: Fragment(){
+class ScannerFragment: BaseFragment(){
     private val viewModel: ScannerViewModel by viewModels{
         ScannerViewModelFactory(BookRepository.getInstance(AppDataBase.getInstance(requireContext()).getBookDao()))
     }
@@ -76,38 +77,16 @@ class ScannerFragment: Fragment(){
         viewModel.hasPermission().observe(viewLifecycleOwner){
             binding.fragmentScannerNoPermissionMsg.visibility = if (it) View.GONE else View.VISIBLE
         }
-        if(checkPermission()){
+        if(checkStoragePermission()){
+            viewModel.setHasPermission(true)
             viewModel.scan()
         }else{
-            requestPermission()
-        }
-    }
-    private fun checkPermission(): Boolean{
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-        val which = ContextCompat.checkSelfPermission(requireContext(),permission) == PackageManager.PERMISSION_GRANTED
-        viewModel.setHasPermission(which)
-        return which
-    }
-    private val requestCode = 668
-    private fun requestPermission(){
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
-        requestPermissions(arrayOf(permission),requestCode)
-    }
-
-    override fun onRequestPermissionsResult(
-        r: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if(r == requestCode){
-            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            requestStoragePermission({
                 viewModel.scan()
                 viewModel.setHasPermission(true)
-            }else{
+            },{
                 viewModel.setHasPermission(false)
-            }
-        }else{
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            })
         }
     }
 

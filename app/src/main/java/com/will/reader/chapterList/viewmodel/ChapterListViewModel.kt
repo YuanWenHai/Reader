@@ -8,12 +8,19 @@ import androidx.paging.PagingSource
 import com.will.reader.data.ChapterDao
 import com.will.reader.data.ChapterRepository
 import com.will.reader.data.model.Book
+import kotlinx.coroutines.launch
 
 /**
  * created  by will on 2020/12/11 16:45
  */
 class ChapterListViewModel(private val book: Book, private val chapterRepos: ChapterRepository): ViewModel() {
-    val chapterFlow = Pager(PagingConfig(pageSize = 20)){
+    val chapterFlow = Pager(PagingConfig(pageSize = 100)){
         chapterRepos.getChaptersPagingByBook(book)
     }.flow
+
+    fun deleteAllChapter(){
+        viewModelScope.launch {
+            chapterRepos.deleteChapterByBook(book)
+        }
+    }
 }

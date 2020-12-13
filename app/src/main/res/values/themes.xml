@@ -17,4 +17,7 @@
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:background">@color/colorPrimary</item>
     </style>
+    <style name="ChapterIndexingSpinner" >
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>
