@@ -1,71 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         xmlns:tools="http://schemas.android.com/tools"
         android:padding="20dp"
-        android:orientation="vertical"
-        android:gravity="center"
         >
-        <LinearLayout
+        <RelativeLayout
+            android:id="@+id/fragment_chapter_index_search_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:text="@string/chapter_add_title"
+                />
+
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_above="@id/fragment_chapter_index_radio_group"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:text="@string/chapter_index_by"
+                />
             <RadioGroup
+                android:id="@+id/fragment_chapter_index_radio_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:layout_centerInParent="true"
+                android:checkedButton="@id/fragment_chapter_index_radio_zhang"
                 >
                 <RadioButton
+                    android:id="@+id/fragment_chapter_index_radio_zhang"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="章"/>
+                    android:textStyle="italic"
+                    android:text="@string/chapter_index_zhang"/>
                 <RadioButton
+                    android:id="@+id/fragment_chapter_index_radio_jie"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="节" />
+                    android:textStyle="italic"
+                    android:text="@string/chapter_index_jie" />
                 <RadioButton
+                    android:id="@+id/fragment_chapter_index_radio_hui"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="回" />
+                    android:textStyle="italic"
+                    android:text="@string/chapter_index_hui" />
                 <RadioButton
+                    android:id="@+id/fragment_chapter_index_radio_ji"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="集" />
+                    android:textStyle="italic"
+                    android:text="@string/chapter_index_ji" />
             </RadioGroup>
-        </LinearLayout>
+            <Button
+                android:id="@+id/fragment_chapter_index_search_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/fragment_chapter_index_radio_group"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/chapter_add"
+                />
+        </RelativeLayout>
 
-        <TextView
-            android:id="@+id/fragment_chapter_index_chapter_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            tools:text="第一章 天地初开"
-            />
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:layout_marginTop="10dp"
-           android:gravity="center_vertical">
-           <ProgressBar
-               android:id="@+id/fragment_chapter_index_progress"
-               android:layout_width="0dp"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:progress="100"
-               style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-               />
-           <TextView
-               android:id="@+id/fragment_chapter_index_progress_text"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_marginStart="10dp"
-               tools:text="92%"
-               />
-       </LinearLayout>
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/fragment_chapter_index_progress_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="invisible">
+            <TextView
+                android:id="@+id/fragment_chapter_index_chapter_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                tools:text="第一章 天地初开"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical">
+                <ProgressBar
+                    android:id="@+id/fragment_chapter_index_progress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:progress="100"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    />
+                <TextView
+                    android:id="@+id/fragment_chapter_index_progress_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    tools:text="92%"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
 </layout>

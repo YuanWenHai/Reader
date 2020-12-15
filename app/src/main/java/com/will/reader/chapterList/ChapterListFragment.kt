@@ -72,23 +72,6 @@ class ChapterListFragment: BaseFragment() {
             }
         }
 
-        binding.fragmentChapterListIndexType.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                keyword = resources.getStringArray(R.array.chapter_indexing_type)[position]
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-            }
-        }
-        binding.fragmentChapterListAddButton.setOnClickListener {
-            ChapterIndexingFragment.get(args.book,keyword).show(parentFragmentManager,"progress_bar")
-        }
     }
 
 
@@ -99,7 +82,7 @@ class ChapterListFragment: BaseFragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.menu_chapter_add){
-            ChapterIndexingFragment.get(args.book,keyword).show(parentFragmentManager,"progress_bar")
+            ChapterIndexingFragment.get(args.book).show(parentFragmentManager,"progress_bar")
         }else if(item.itemId == R.id.menu_chapter_delete){
             viewModel.deleteAllChapter()
             makeLongToast(requireContext(),"已删除章节信息")

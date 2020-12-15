@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.RadioButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
@@ -65,6 +66,35 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
         binding.fragmentChapterIndexProgress.max = 100
         binding.fragmentChapterIndexProgressText.text = "0%"
         binding.fragmentChapterIndexChapterText.text = "未发现章节"
+
+        binding.fragmentChapterIndexSearchButton.setOnClickListener {
+            binding.fragmentChapterIndexSearchLayout.visibility = View.INVISIBLE
+            binding.fragmentChapterIndexProgressLayout.visibility = View.VISIBLE
+            val checkedRadioId = binding.fragmentChapterIndexRadioGroup.checkedRadioButtonId
+            val keyword = binding.root.findViewById<RadioButton>(checkedRadioId).text.toString()
+            isCancelable = false
+            viewLifecycleOwner.lifecycleScope.launch{
+                finder.indexing(keyword).collect {
+                    when(it){
+                        is ChapterFinder.FindResult.Find -> {
+                            binding.fragmentChapterIndexChapterText.text = it.chapter.name
+                            viewModel.addChapter(it.chapter)
+                        }
+                        is ChapterFinder.FindResult.Progress -> {
+                            binding.fragmentChapterIndexProgress.progress = it.progress
+                            binding.fragmentChapterIndexProgressText.text = "${it.progress}%"
+                        }
+                        is ChapterFinder.FindResult.Finish -> {
+                            binding.fragmentChapterIndexProgressText.text = "检索完毕"
+                            binding.fragmentChapterIndexProgress.progress = 100
+                            viewModel.commit()
+                            dismiss()
+                        }
+                    }
+
+                }
+            }
+        }
         /*viewLifecycleOwner.lifecycleScope.launch{
             finder.indexing(getKeyword(this@ChapterIndexingFragment)).collect {
                 when(it){
@@ -96,12 +126,10 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
 
     companion object{
         private const val DATA_BOOK = "data_book"
-        private const val DATA_KEYWORD = "data_keyword"
-        fun get(book: Book,keyword: String): ChapterIndexingFragment{
+        fun get(book: Book): ChapterIndexingFragment{
             return ChapterIndexingFragment().also {
                 val bundle = Bundle()
                 bundle.putSerializable(DATA_BOOK,book)
-                bundle.putString(DATA_KEYWORD,keyword)
                 it.arguments = bundle
             }
         }
@@ -110,11 +138,7 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
                 return it.getSerializable(DATA_BOOK) as Book
             } ?: throw IllegalArgumentException("must pass book to here")
         }
-        private fun getKeyword(fragment: ChapterIndexingFragment): String{
-            fragment.arguments?.let {
-                return it.getString(DATA_KEYWORD) as String
-            } ?: throw IllegalArgumentException("must pass keyword to here")
-        }
+
     }
 
 }

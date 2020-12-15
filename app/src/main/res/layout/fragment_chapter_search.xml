@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/fragment_chapter_index_search_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:text="@string/chapter_add_title"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_above="@id/fragment_chapter_index_radio_group"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:text="@string/chapter_index_by"
+            />
+        <RadioGroup
+            android:id="@+id/fragment_chapter_index_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerInParent="true"
+            android:checkedButton="@id/fragment_chapter_index_radio_zhang"
+            >
+            <RadioButton
+                android:id="@+id/fragment_chapter_index_radio_zhang"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="italic"
+                android:text="@string/chapter_index_zhang"/>
+            <RadioButton
+                android:id="@+id/fragment_chapter_index_radio_jie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="italic"
+                android:text="@string/chapter_index_jie" />
+            <RadioButton
+                android:id="@+id/fragment_chapter_index_radio_hui"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="italic"
+                android:text="@string/chapter_index_hui" />
+            <RadioButton
+                android:id="@+id/fragment_chapter_index_radio_ji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="italic"
+                android:text="@string/chapter_index_ji" />
+        </RadioGroup>
+        <Button
+            android:id="@+id/fragment_chapter_index_search_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/fragment_chapter_index_radio_group"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/chapter_add"
+            />
+    </RelativeLayout>
+</layout>

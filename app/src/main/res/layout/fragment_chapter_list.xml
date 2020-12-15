@@ -17,56 +17,30 @@
            android:layout_width="match_parent"
            android:layout_height="match_parent"
            android:background="@color/white">
-           <LinearLayout
-               android:id="@+id/fragment_chapter_index_layout_search"
+            <TextView
+                android:id="@+id/fragment_chapter_list_empty_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/chapter_empty"
+                 />
+           <TextView
+               android:id="@+id/fragment_chapter_list_professional_text"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:layout_centerInParent="true"
-               android:orientation="vertical"
-               android:gravity="center_horizontal"
-               android:visibility="gone"
-               >
-              <!-- <TextView
-                   android:id="@+id/fragment_chapter_list_empty_msg"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:text="@string/chapter_empty"
-                  />-->
-               <LinearLayout
-                   android:layout_width="wrap_content"
-                   android:layout_height="48dp"
-                   >
-                   <TextView
-                       android:layout_width="wrap_content"
-                       android:layout_height="match_parent"
-                       android:gravity="center"
-                       android:textColor="@color/black"
-                       android:textSize="16sp"
-                       android:text="@string/chapter_index_by"/>
-                   <Spinner
-                       android:id="@+id/fragment_chapter_list_index_type"
-                       android:layout_width="wrap_content"
-                       android:layout_height="match_parent"
-                       android:layout_gravity="bottom"
-                       android:entries="@array/chapter_indexing_type"
-                       android:theme="@style/ChapterIndexingSpinner"
-                       />
-                   <Button
-                       android:id="@+id/fragment_chapter_list_add_button"
-                       android:layout_width="wrap_content"
-                       android:layout_height="match_parent"
-                       android:text="@string/chapter_add"
-                       android:backgroundTint="@color/colorPrimaryLight"
-                       />
-
-               </LinearLayout>
-           </LinearLayout>
+               android:layout_alignParentBottom="true"
+               android:layout_alignParentEnd="true"
+               android:layout_margin="20dp"
+               android:textColor="@color/colorPrimaryDark"
+               android:text="@string/chapter_add_professional"
+               />
            <androidx.recyclerview.widget.RecyclerView
                android:id="@+id/fragment_chapter_list_recycler"
                android:layout_width="match_parent"
                android:layout_height="match_parent"
                android:background="@color/white"
                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
        </RelativeLayout>
     </LinearLayout>
 </layout>
