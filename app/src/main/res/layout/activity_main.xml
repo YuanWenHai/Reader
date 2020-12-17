@@ -10,8 +10,9 @@
         android:id="@+id/main_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:name="com.will.reader.test.TestFragment"/>
+        <!--android:name="androidx.navigation.fragment.NavHostFragment"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/app_graph" />
+        app:navGraph="@navigation/app_graph" -->
 
 </FrameLayout>

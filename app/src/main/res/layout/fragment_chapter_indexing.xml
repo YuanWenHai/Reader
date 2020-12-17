@@ -9,7 +9,9 @@
         <RelativeLayout
             android:id="@+id/fragment_chapter_index_search_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            tools:visibility="gone"
+            >
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -80,7 +82,9 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:visibility="invisible">
+            android:visibility="invisible"
+            tools:visibility="visible"
+            >
             <TextView
                 android:id="@+id/fragment_chapter_index_chapter_text"
                 android:layout_width="wrap_content"
@@ -109,6 +113,15 @@
                     tools:text="92%"
                     />
             </LinearLayout>
+            <Button
+                android:id="@+id/fragment_chapter_index_cancel_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:text="@string/cancel"/>
         </LinearLayout>
     </FrameLayout>
 </layout>

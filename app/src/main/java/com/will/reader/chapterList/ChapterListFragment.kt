@@ -48,6 +48,12 @@ class ChapterListFragment: BaseFragment() {
     }
 
     private fun initView(binding: FragmentChapterListBinding){
+        // TODO: 2020/12/17  自定义正则匹配将在之后的版本迭代中完成
+        binding.fragmentChapterListProfessionalText.setOnClickListener{
+            makeLongToast(requireContext(),"正在开发中..")
+        }
+
+
         setHasOptionsMenu(true)
         val parent = requireActivity() as AppCompatActivity
         parent.setSupportActionBar(binding.fragmentChapterListToolbar)

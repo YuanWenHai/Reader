@@ -44,13 +44,6 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
         finder = ChapterFinder(getBook(this))
     }
 
-   /* override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val binding = FragmentChapterIndexingBinding.inflate(layoutInflater)
-        return AlertDialog.Builder(requireContext()).setView(binding.root)
-           .setCancelable(false)
-           .create()
-    }
-*/
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -95,27 +88,9 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
                 }
             }
         }
-        /*viewLifecycleOwner.lifecycleScope.launch{
-            finder.indexing(getKeyword(this@ChapterIndexingFragment)).collect {
-                when(it){
-                    is ChapterFinder.FindResult.Find -> {
-                        binding.fragmentChapterIndexChapterText.text = it.chapter.name
-                        viewModel.addChapter(it.chapter)
-                    }
-                    is ChapterFinder.FindResult.Progress -> {
-                        binding.fragmentChapterIndexProgress.progress = it.progress
-                        binding.fragmentChapterIndexProgressText.text = "${it.progress}%"
-                    }
-                    is ChapterFinder.FindResult.Finish -> {
-                        binding.fragmentChapterIndexProgressText.text = "检索完毕"
-                        binding.fragmentChapterIndexProgress.progress = 100
-                        viewModel.commit()
-                        dismiss()
-                    }
-                }
-
-            }
-        }*/
+        binding.fragmentChapterIndexCancelButton.setOnClickListener {
+            dismiss()
+        }
     }
 
 
