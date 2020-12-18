@@ -8,24 +8,45 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Config
 import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
+import com.will.reader.data.model.Book
 import com.will.reader.util.getFormattedTime
 import kotlinx.coroutines.launch
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
  * created  by will on 2020/12/3 12:51
  */
-class PrintViewModel(private val printer: Printer,private val bookRepos: BookRepository,private val chapterRepository: ChapterRepository): ViewModel() {
+class PrintViewModel(private val book: Book, private val bookRepos: BookRepository, private val chapterRepository: ChapterRepository): ViewModel() {
+    private val printer: Printer = Printer(book)
     private val page: MutableLiveData<ReaderView.Content> = MutableLiveData()
     private val currentChapter: MutableLiveData<String> = MutableLiveData()
+    private val currentEncode: MutableLiveData<String> = MutableLiveData(book.encode)
     private var config: PrintConfig? = null
     private var screenWidth = 0f
     private var screenHeight = 0f
 
     fun page(): LiveData<ReaderView.Content> = page
     fun currentChapter(): LiveData<String> = currentChapter
+
+
+
+    fun changeEncode(){
+        val charsets = listOf("GBK","GB2312","UTF-8")
+        val old = charsets.indexOf(currentEncode.value?: "GBK")
+        val new = if (old+1 >= charsets.size) 0 else old+1
+        val newEncode = charsets[new]
+        currentEncode.value = newEncode
+        printer.setEncoding(newEncode)
+        config?.let {
+            // TODO: 2020/12/18   
+            applyConfigChanges(it,context)
+        }
+    }
+
 
     fun resetPage(context: Context, config: PrintConfig){
        screenWidth = context.resources.displayMetrics.widthPixels.toFloat()

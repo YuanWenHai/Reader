@@ -20,6 +20,11 @@ class IndexBubble(context: Context): View(context) {
     private var contentX = 0f
     private var contentY = 0f
 
+    init {
+        mPaint.textSize = 16 * resources.displayMetrics.density
+    }
+
+
     override fun onDraw(canvas: Canvas?) {
         canvas?.let {drawBubble(it)}
     }
@@ -45,15 +50,11 @@ class IndexBubble(context: Context): View(context) {
         radius = dimen/2.toFloat()
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-    }
-
 
     fun setContent(content: String){
         mContent = content
-        contentX = (width + mPaint.measureText(mContent))/2f
-        contentY = height/2f
+        contentX = (width - mPaint.measureText(content))/2f
+        contentY = (height + mPaint.textSize)/2f
         invalidate()
     }
 }

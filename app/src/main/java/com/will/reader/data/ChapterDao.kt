@@ -18,7 +18,7 @@ interface ChapterDao {
     @Query("SELECT * FROM chapter WHERE id=:id")
     fun getChapterById(id: Long): Chapter
 
-    @Query("SELECT * FROM chapter WHERE bookId= :bookId AND positionInByte < :position  ORDER BY positionInByte DESC LIMIT 1 ")
+    @Query("SELECT * FROM chapter WHERE (bookId= :bookId AND positionInByte < :position)  ORDER BY positionInByte DESC LIMIT 1 ")
     fun getChapterByBookIdAndPositionRange(bookId: Long,position: Int): Chapter?
 
     @Query("SELECT * FROM chapter WHERE bookId = :id ORDER BY number ASC")

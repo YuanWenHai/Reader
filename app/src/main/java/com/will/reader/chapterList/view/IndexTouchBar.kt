@@ -11,9 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import com.will.reader.R
 import com.will.reader.util.LOG_TAG
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlin.math.truncate
+import kotlin.math.*
 
 /**
  * created  by will on 2020/12/17 10:43
@@ -61,7 +59,7 @@ class IndexTouchBar(context: Context): View(context) {
     }
 
     private fun drawBar(canvas: Canvas){
-        canvas.drawRect(0f,0f,barWidth,height.toFloat(),mPaint)
+        canvas.drawRoundRect(0f,0f,barWidth,height.toFloat(),barWidth/2,barWidth/2,mPaint)
     }
 
 
@@ -72,8 +70,7 @@ class IndexTouchBar(context: Context): View(context) {
             if (touched && abs(event.y - lastY) > moveThresholds){
                 val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 vibrator.vibrate(15)
-                val value = ((event.y / height.toFloat())*100).roundToInt()/100f
-                it.onMove(value)
+                it.onMove(calculateValue(event))
                 lastY = event.y
             }
         }
@@ -81,8 +78,7 @@ class IndexTouchBar(context: Context): View(context) {
     private fun handleTouchUp(event: MotionEvent){
         callback?.let {
             if(touched){
-                val value = lastY / height.toFloat()
-                it.onUp(value)
+                it.onUp(calculateValue(event))
             }
         }
         touched = false
@@ -91,10 +87,14 @@ class IndexTouchBar(context: Context): View(context) {
         touched = false
         callback?.onCancel()
     }
+    private fun calculateValue(event: MotionEvent): Int{
+        val value = ((event.y*100f / height.toFloat())).roundToInt()
+        return min(100,max(value,0))
+    }
 
     interface TouchBarEventCallback{
-        fun onMove(value: Float)
-        fun onUp(value: Float)
+        fun onMove(value: Int)
+        fun onUp(value: Int)
         fun onCancel()
     }
 

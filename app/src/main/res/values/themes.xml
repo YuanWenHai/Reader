@@ -20,4 +20,7 @@
     <style name="ChapterIndexingSpinner" >
         <item name="android:textStyle">bold</item>
     </style>
+    <style name="ReaderMenuItemText">
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>

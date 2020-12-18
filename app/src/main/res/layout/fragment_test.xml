@@ -5,6 +5,7 @@
     android:fitsSystemWindows="true"
     >
     <com.will.reader.chapterList.view.IndexRecyclerView
-        android:layout_width="wrap_content"
+        android:id="@+id/fragment_test_recycler"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </FrameLayout>

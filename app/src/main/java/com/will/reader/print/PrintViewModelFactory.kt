@@ -12,6 +12,6 @@ import com.will.reader.data.model.Book
  */
 class PrintViewModelFactory(private val book: Book,private val bookRepository: BookRepository,private val chapterRepository: ChapterRepository): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return PrintViewModel(Printer(book),bookRepository,chapterRepository) as T
+        return PrintViewModel(book,bookRepository,chapterRepository) as T
     }
 }

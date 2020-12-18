@@ -34,12 +34,11 @@
                android:textColor="@color/colorPrimaryDark"
                android:text="@string/chapter_add_professional"
                />
-           <androidx.recyclerview.widget.RecyclerView
+           <com.will.reader.chapterList.view.IndexRecyclerView
                android:id="@+id/fragment_chapter_list_recycler"
                android:layout_width="match_parent"
                android:layout_height="match_parent"
-               android:background="@color/white"
-               app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+               android:background="@color/white" />
 
        </RelativeLayout>
     </LinearLayout>

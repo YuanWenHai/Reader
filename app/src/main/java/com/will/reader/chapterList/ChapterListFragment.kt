@@ -1,13 +1,8 @@
 package com.will.reader.chapterList
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -19,7 +14,6 @@ import com.will.reader.chapterList.viewmodel.ChapterListViewModelFactory
 import com.will.reader.data.AppDataBase
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentChapterListBinding
-import com.will.reader.util.LOG_TAG
 import com.will.reader.util.makeLongToast
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -63,7 +57,7 @@ class ChapterListFragment: BaseFragment() {
 
         val adapter = ChapterListAdapter()
         binding.fragmentChapterListToolbar.title = args.book.name
-        binding.fragmentChapterListRecycler.adapter = adapter
+        binding.fragmentChapterListRecycler.recycler().adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chapterFlow.collectLatest {
                 adapter.submitData(it)
