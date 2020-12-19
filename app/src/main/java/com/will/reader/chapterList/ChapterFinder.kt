@@ -16,51 +16,49 @@ import java.nio.charset.Charset
  * created  by will on 2020/12/11 17:49
  */
 class ChapterFinder(private val book: Book) {
-    private val regex: Regex = Regex("第[(0-9)零一二三四五六七八九十百千万]*章.*")
+    private val regex: Regex = Regex("第*[(0-9)零一二三四五六七八九十百千万]+章.*")
 
 
 
     suspend fun indexing(keyword: String): Flow<FindResult> = flow{
         val bookFile = File(book.path)
-        val regex = Regex("第[(0-9)零一二三四五六七八九十百千万]*${keyword}.*")
+        val regex = Regex("第*[(0-9)零一二三四五六七八九十百千万]+${keyword}.*")
         if(bookFile.isFile){
-            withContext(IO){
-                val fi = FileInputStream(bookFile)
-                val channel = fi.channel
-                val bytes = channel.map(FileChannel.MapMode.READ_ONLY,0,bookFile.length())
-                var number = 0
-                var charCount = 0
-                var currentPos = 0
-                var current: Chapter
-                var previous: Chapter? = null
-                var emittedBytes = 0
-                val emitThreshold = 1024 * 10 //每10kb提交一次progress
-                while (currentPos < bookFile.length()){
-                    val line = readLine(currentPos,bytes)
-                    charCount += line.text.length
-                    if(regex.matches(line.text)){
-                        current = Chapter.build(line.text,number,currentPos,0,book.id)
-                        previous?.let {
-                            emit(FindResult.Find(it.copy(charCount = charCount)))
-                            charCount = 0
-                        }
-                        previous = current
-                        number++
+            val fi = FileInputStream(bookFile)
+            val channel = fi.channel
+            val bytes = channel.map(FileChannel.MapMode.READ_ONLY,0,bookFile.length())
+            var number = 0
+            var charCount = 0
+            var currentPos = 0
+            var current: Chapter
+            var previous: Chapter? = null
+            var emittedBytes = 0
+            val emitThreshold = 1024 * 10 //每10kb提交一次progress
+            while (currentPos < bookFile.length()){
+                val line = readLine(currentPos,bytes)
+                charCount += line.text.length
+                if(regex.matches(line.text)){
+                    current = Chapter.build(line.text,number,currentPos,0,book.id)
+                    previous?.let {
+                        emit(FindResult.Find(it.copy(charCount = charCount)))
+                        charCount = 0
                     }
-                    emittedBytes += line.nextLineStart - currentPos
-                    if(emittedBytes > emitThreshold){
-                        emit(FindResult.Progress(currentPos*100/bookFile.length().toInt()))
-                        emittedBytes = 0
-                    }
-                    currentPos = line.nextLineStart
+                    previous = current
+                    number++
                 }
-                previous?.let {
-                    emit(FindResult.Find(it.copy(charCount = charCount)))
+                emittedBytes += line.nextLineStart - currentPos
+                if(emittedBytes > emitThreshold){
+                    emit(FindResult.Progress(currentPos*100/bookFile.length().toInt()))
+                    emittedBytes = 0
                 }
-                emit(FindResult.Finish)
-                channel.close()
-                fi.close()
+                currentPos = line.nextLineStart
             }
+            previous?.let {
+                emit(FindResult.Find(it.copy(charCount = charCount)))
+            }
+            emit(FindResult.Finish)
+            channel.close()
+            fi.close()
         }
     }.flowOn(IO)
 

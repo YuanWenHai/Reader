@@ -10,6 +10,7 @@ import com.will.reader.data.BookDao
 import com.will.reader.data.BookRepository
 import com.will.reader.data.model.Book
 import com.will.reader.extensions.isBook
+import com.will.reader.util.LOG_TAG
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -54,11 +55,11 @@ class ScannerViewModel(private val scanner: FileScanner,private val bookRepos: B
     }
     fun save(file: File){
         if(!file.exists()){
-            Log.w("!~","file: ${file.path} does not exits,save canceled")
+            Log.w(LOG_TAG,"file: ${file.path} does not exits,save canceled")
             return
         }
         if(!file.isBook()){
-            Log.w("!~","file: ${file.path} is not book,save canceled")
+            Log.w(LOG_TAG,"file: ${file.path} is not book,save canceled")
             return
         }
         viewModelScope.launch {
@@ -72,7 +73,7 @@ class ScannerViewModel(private val scanner: FileScanner,private val bookRepos: B
             if(file.exists() && file.isBook()){
                 list.add(Book.build(file))
             }else{
-                Log.w("!~","ignore file: ${file.path},cause it does not exist or is not book")
+                Log.w(LOG_TAG,"ignore file: ${file.path},cause it does not exist or is not book")
             }
         }
         viewModelScope.launch {

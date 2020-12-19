@@ -8,7 +8,7 @@
     <string name="scanner_open">选择书籍</string>
     <string name="current_text_size">当前字体大小：</string>
     <string name="current_progress">当前进度：</string>
-    <string name="skip_progress">跳转</string>
+    <string name="skip_progress">进度跳转</string>
     <string name="catalog">目录</string>
     <string name="current_chapter">当前章节：</string>
     <string name="text_increase">增大</string>

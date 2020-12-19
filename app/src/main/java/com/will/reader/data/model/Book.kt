@@ -31,7 +31,7 @@ data class Book(
                         val id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE
                         val name = file.name
                         val path = file.path
-                        val encode = "GBK"
+                        val encode = "GB18030"
                         val brief = ""
                         val size = file.length()
                         val charCount = 0

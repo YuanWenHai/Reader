@@ -1,9 +1,14 @@
 package com.will.reader.print
 
+import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,6 +20,7 @@ import com.will.reader.data.AppDataBase
 import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentReaderBinding
+import com.will.reader.util.LOG_TAG
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -22,16 +28,15 @@ import kotlinx.coroutines.launch
  * created  by will on 2020/11/29 17:31
  */
 class ReaderFragment: Fragment() {
-    private val viewModel: PrintViewModel by viewModels{
+    private val viewModel: ReaderViewModel by viewModels{
         PrintViewModelFactory(
-            arg.book.copy(encode = "gbk"),
+            arg.book,
             BookRepository.getInstance(AppDataBase.getInstance(requireContext()).getBookDao()),
             ChapterRepository.getInstance(AppDataBase.getInstance(requireContext()).getChapterDao())
         )
 
     }
     private val arg: ReaderFragmentArgs by navArgs()
-    private var menuClickFlag = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding: FragmentReaderBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_reader,container,false)
@@ -56,6 +61,13 @@ class ReaderFragment: Fragment() {
         }
         viewModel.page().observe(viewLifecycleOwner){
             binding.fragmentReaderView.submitContent(it)
+            binding.fragmentReaderProgressText.text = resources.getString(R.string.current_progress).plus(it.progress)
+        }
+        viewModel.currentEncode().observe(viewLifecycleOwner){
+            binding.fragmentReaderEncodeText.text = it
+        }
+        viewModel.showMenu().observe(viewLifecycleOwner){
+
         }
     }
 
@@ -92,7 +104,13 @@ class ReaderFragment: Fragment() {
         }
 
         binding.fragmentReaderChapterButton.setOnClickListener{
-            findNavController().navigate(ReaderFragmentDirections.actionReaderFragmentToChapterListFragment(arg.book))
+            findNavController().navigate(ReaderFragmentDirections.actionReaderFragmentToChapterListFragment(viewModel.getBook()))
+        }
+        binding.fragmentReaderEncodeButton.setOnClickListener {
+            viewModel.changeEncode(requireContext())
+        }
+        binding.fragmentReaderProgressButton.setOnClickListener {
+            showChangeProgressDialog()
         }
     }
     private fun changeMenuState(menu: View){
@@ -100,6 +118,16 @@ class ReaderFragment: Fragment() {
         menu.visibility = if(menuClickFlag) View.VISIBLE else View.GONE
     }
 
+    // TODO: 2020/12/19  alert dialog的window会导致app window中设置的systemUiVisibility失效
+    private fun showChangeProgressDialog(){
+        val view = EditText(requireContext())
+        view.inputType = EditorInfo.TYPE_NUMBER_FLAG_DECIMAL or EditorInfo.TYPE_CLASS_NUMBER
+        view.hint = viewModel.page().value?.progress ?: "0%"
+        val dialog = AlertDialog.Builder(requireContext()).setView(view)
+            .setTitle("输入进度")
+            .create()
+        dialog.show()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -109,7 +137,6 @@ class ReaderFragment: Fragment() {
         super.onPause()
         viewModel.saveBookState()
         requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-
     }
 
 }

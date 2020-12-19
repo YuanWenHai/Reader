@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * created  by will on 2020/12/11 16:45
  */
 class ChapterListViewModel(private val book: Book, private val chapterRepos: ChapterRepository): ViewModel() {
-    val chapterFlow = Pager(PagingConfig(pageSize = 100)){
+    val chapterFlow = Pager(PagingConfig(pageSize = 200)){
         chapterRepos.getChaptersPagingByBook(book)
     }.flow
 
