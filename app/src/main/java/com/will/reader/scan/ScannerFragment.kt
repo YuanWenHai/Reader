@@ -77,17 +77,15 @@ class ScannerFragment: BaseFragment(){
         viewModel.hasPermission().observe(viewLifecycleOwner){
             binding.fragmentScannerNoPermissionMsg.visibility = if (it) View.GONE else View.VISIBLE
         }
-        if(checkStoragePermission()){
+
+        runWithStoragePermission({
             viewModel.setHasPermission(true)
             viewModel.scan()
-        }else{
-            requestStoragePermission({
-                viewModel.scan()
-                viewModel.setHasPermission(true)
-            },{
-                viewModel.setHasPermission(false)
-            })
+         },
+        {
+            viewModel.setHasPermission(false)
         }
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

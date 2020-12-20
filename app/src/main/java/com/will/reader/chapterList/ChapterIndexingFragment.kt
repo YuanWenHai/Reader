@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +22,7 @@ import com.will.reader.data.AppDataBase
 import com.will.reader.data.ChapterRepository
 import com.will.reader.data.model.Book
 import com.will.reader.databinding.FragmentChapterIndexingBinding
+import com.will.reader.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -28,8 +30,9 @@ import java.lang.IllegalArgumentException
 /**
  * created  by will on 2020/12/12 18:21
  */
-class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
+class ChapterIndexingFragment (): BaseDialogFragment() {
 
+    private val appViewModel: AppViewModel by activityViewModels()
     private val viewModel: ChapterIndexingViewModel by viewModels{
         object: ViewModelProvider.Factory{
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -41,7 +44,7 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        finder = ChapterFinder(getBook(this))
+        finder = ChapterFinder(appViewModel.book().value!!)
     }
 
     override fun onCreateView(
@@ -99,7 +102,7 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
 
 
 
-    companion object{
+  /*  companion object{
         private const val DATA_BOOK = "data_book"
         fun get(book: Book): ChapterIndexingFragment{
             return ChapterIndexingFragment().also {
@@ -114,6 +117,6 @@ class ChapterIndexingFragment private constructor(): BaseDialogFragment() {
             } ?: throw IllegalArgumentException("must pass book to here")
         }
 
-    }
+    }*/
 
 }

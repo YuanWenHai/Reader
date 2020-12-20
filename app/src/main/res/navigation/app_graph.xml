@@ -22,9 +22,9 @@
         android:id="@+id/readerFragment"
         android:name="com.will.reader.print.ReaderFragment"
         android:label="ReaderFragment" >
-        <argument
+       <!-- <argument
             android:name="book"
-            app:argType="com.will.reader.data.model.Book" />
+            app:argType="com.will.reader.data.model.Book" />-->
         <action
             android:id="@+id/action_readerFragment_to_chapterListFragment"
             app:destination="@id/chapterListFragment" />
@@ -33,8 +33,8 @@
         android:id="@+id/chapterListFragment"
         android:name="com.will.reader.chapterList.ChapterListFragment"
         android:label="ChapterListFragment" >
-        <argument
+        <!--<argument
             android:name="book"
-            app:argType="com.will.reader.data.model.Book"/>
+            app:argType="com.will.reader.data.model.Book"/>-->
     </fragment>
 </navigation>

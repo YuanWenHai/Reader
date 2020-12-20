@@ -13,6 +13,8 @@ import java.lang.StringBuilder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -55,6 +57,13 @@ class Printer(private var book: Book){
 
     fun setEncoding(encode: String){
         this.book = book.copy(encode = encode)
+    }
+
+    fun skipToProgress(progress: Float){
+        val p = min(100f,max(0f,progress))/100
+        val targetPos = (bookFile.length() * p).toInt()
+        val availablePos = findLastParagraphStartPos(targetPos)
+        pageBegin = availablePos
     }
 
     /**

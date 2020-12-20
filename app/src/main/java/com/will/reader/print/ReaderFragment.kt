@@ -1,7 +1,6 @@
 package com.will.reader.print
 
 import android.app.AlertDialog
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,34 +8,36 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.activity.addCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.will.reader.R
 import com.will.reader.data.AppDataBase
-import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentReaderBinding
 import com.will.reader.util.LOG_TAG
+import com.will.reader.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 /**
  * created  by will on 2020/11/29 17:31
  */
 class ReaderFragment: Fragment() {
+    private val appViewModel: AppViewModel by activityViewModels()
     private val viewModel: ReaderViewModel by viewModels{
         PrintViewModelFactory(
-            arg.book,
-            BookRepository.getInstance(AppDataBase.getInstance(requireContext()).getBookDao()),
+            appViewModel.book().value!!,
             ChapterRepository.getInstance(AppDataBase.getInstance(requireContext()).getChapterDao())
         )
 
     }
-    private val arg: ReaderFragmentArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding: FragmentReaderBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_reader,container,false)
@@ -49,13 +50,14 @@ class ReaderFragment: Fragment() {
                 binding.fragmentReaderTextSize.text = getString(R.string.current_text_size).plus("${config.textSize}")
             }
         }
-        initViewClickEvent(binding)
+        initViewEvent(binding)
         observeData(binding)
         return binding.root
     }
 
 
     private fun observeData(binding: FragmentReaderBinding){
+
         viewModel.currentChapter().observe(viewLifecycleOwner){
             binding.fragmentReaderChapterText.text = it
         }
@@ -67,32 +69,19 @@ class ReaderFragment: Fragment() {
             binding.fragmentReaderEncodeText.text = it
         }
         viewModel.showMenu().observe(viewLifecycleOwner){
-
+            binding.fragmentReaderMenu.visibility = if(it) View.VISIBLE else View.INVISIBLE
         }
     }
 
 
-    private fun initViewClickEvent(binding: FragmentReaderBinding){
+    private fun initViewEvent(binding: FragmentReaderBinding){
 
         binding.fragmentReaderView.setOnClickListener {
             which ->
             when(which){
-                ReaderView.LEFT_CLICK -> {
-                    if(menuClickFlag){
-                        changeMenuState(binding.fragmentReaderMenu)
-                        return@setOnClickListener
-                    }
-                    viewModel.pageUp(requireContext())
-
-                }
-                ReaderView.CENTER_CLICK ->  changeMenuState(binding.fragmentReaderMenu)
-                ReaderView.RIGHT_CLICK -> {
-                    if(menuClickFlag){
-                        changeMenuState(binding.fragmentReaderMenu)
-                        return@setOnClickListener
-                    }
-                    viewModel.pageDown(requireContext())
-                }
+                ReaderView.LEFT_CLICK -> viewModel.leftClick(requireContext())
+                ReaderView.CENTER_CLICK ->  viewModel.changeMenuState()
+                ReaderView.RIGHT_CLICK -> viewModel.rightClick(requireContext())
             }
         }
         binding.fragmentReaderTextSizeIncrease.setOnClickListener{
@@ -104,30 +93,31 @@ class ReaderFragment: Fragment() {
         }
 
         binding.fragmentReaderChapterButton.setOnClickListener{
-            findNavController().navigate(ReaderFragmentDirections.actionReaderFragmentToChapterListFragment(viewModel.getBook()))
+            findNavController().navigate(ReaderFragmentDirections.actionReaderFragmentToChapterListFragment())
+            viewModel.closeMenu()
         }
         binding.fragmentReaderEncodeButton.setOnClickListener {
-            viewModel.changeEncode(requireContext())
+            val newBook = viewModel.changeEncode(requireContext())
+            appViewModel.updateBook(newBook)
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner){
+            if(viewModel.canGoBack()){
+                findNavController().popBackStack()
+            }
         }
         binding.fragmentReaderProgressButton.setOnClickListener {
-            showChangeProgressDialog()
+            SkipProgressFragment().show(parentFragmentManager,"skip_progress_fragment")
+        }
+        setFragmentResultListener(SkipProgressFragment.REQUEST_KEY){
+            _, bundle ->
+            val value = bundle.getFloat(SkipProgressFragment.VALUE_KEY)
+            viewModel.skipProgress(requireContext(),value)
+            viewModel.closeMenu()
+
         }
     }
-    private fun changeMenuState(menu: View){
-        menuClickFlag = !menuClickFlag
-        menu.visibility = if(menuClickFlag) View.VISIBLE else View.GONE
-    }
 
-    // TODO: 2020/12/19  alert dialog的window会导致app window中设置的systemUiVisibility失效
-    private fun showChangeProgressDialog(){
-        val view = EditText(requireContext())
-        view.inputType = EditorInfo.TYPE_NUMBER_FLAG_DECIMAL or EditorInfo.TYPE_CLASS_NUMBER
-        view.hint = viewModel.page().value?.progress ?: "0%"
-        val dialog = AlertDialog.Builder(requireContext()).setView(view)
-            .setTitle("输入进度")
-            .create()
-        dialog.show()
-    }
 
     override fun onResume() {
         super.onResume()
@@ -135,8 +125,8 @@ class ReaderFragment: Fragment() {
     }
     override fun onPause() {
         super.onPause()
-        viewModel.saveBookState()
+        val book = viewModel.getBookForSave()
+        appViewModel.updateBook(book)
         requireActivity().window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
     }
-
 }

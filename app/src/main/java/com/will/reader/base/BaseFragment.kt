@@ -22,6 +22,13 @@ open class BaseFragment: Fragment() {
         val permission = Manifest.permission.READ_EXTERNAL_STORAGE
         return  ContextCompat.checkSelfPermission(requireContext(),permission) == PackageManager.PERMISSION_GRANTED
     }
+    fun runWithStoragePermission(grant: () -> Unit,deny: () -> Unit){
+        if(checkStoragePermission()){
+            grant()
+        }else{
+            requestStoragePermission(grant,deny)
+        }
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

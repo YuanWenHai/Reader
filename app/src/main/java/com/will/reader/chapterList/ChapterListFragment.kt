@@ -3,6 +3,7 @@ package com.will.reader.chapterList
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -15,6 +16,7 @@ import com.will.reader.data.AppDataBase
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentChapterListBinding
 import com.will.reader.util.makeLongToast
+import com.will.reader.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -22,14 +24,13 @@ import kotlinx.coroutines.launch
  * created  by will on 2020/12/11 15:53
  */
 class ChapterListFragment: BaseFragment() {
+    private val appViewModel: AppViewModel by activityViewModels()
     private val viewModel: ChapterListViewModel by viewModels{
         ChapterListViewModelFactory(
-            args.book,
+            appViewModel.book().value!!,
             ChapterRepository.getInstance(AppDataBase.getInstance(requireContext()).getChapterDao())
         )
     }
-    private val args: ChapterListFragmentArgs by navArgs()
-    private var keyword = "章"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,7 +57,7 @@ class ChapterListFragment: BaseFragment() {
 
 
         val adapter = ChapterListAdapter()
-        binding.fragmentChapterListToolbar.title = args.book.name
+        binding.fragmentChapterListToolbar.title = appViewModel.book().value!!.name
         binding.fragmentChapterListRecycler.recycler().adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chapterFlow.collectLatest {
@@ -82,7 +83,7 @@ class ChapterListFragment: BaseFragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.menu_chapter_add){
-            ChapterIndexingFragment.get(args.book).show(parentFragmentManager,"progress_bar")
+            ChapterIndexingFragment().show(parentFragmentManager,"progress_bar")
         }else if(item.itemId == R.id.menu_chapter_delete){
             viewModel.deleteAllChapter()
             makeLongToast(requireContext(),"已删除章节信息")

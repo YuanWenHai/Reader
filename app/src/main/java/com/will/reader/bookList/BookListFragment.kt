@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -20,6 +21,7 @@ import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentBookListBinding
 import com.will.reader.util.makeLongToast
+import com.will.reader.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -27,6 +29,7 @@ import kotlinx.coroutines.launch
  * created  by will on 2020/11/22 12:15
  */
 class BookListFragment: BaseFragment() {
+    private val appViewModel: AppViewModel by activityViewModels()
     private val viewModel: BookListViewModel by viewModels{
         val appDb =  AppDataBase.getInstance(requireContext())
         BookViewModelFactory(
@@ -48,25 +51,18 @@ class BookListFragment: BaseFragment() {
         val parent = activity as AppCompatActivity
         parent.setSupportActionBar(binding.bookListToolbar)
         val adapter = BookListAdapter{
-            if(checkStoragePermission()){
-                if(viewModel.checkBook(it)){
-                    findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment(it))
+            book ->
+            runWithStoragePermission({
+                if(viewModel.checkBook(book)){
+                    appViewModel.updateBook(book)
+                    findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment())
                 }else{
                     Toast.makeText(requireContext(),"该书籍已不存在！",Toast.LENGTH_LONG).show()
-                    viewModel.deleteBook(it)
+                    viewModel.deleteBook(book)
                 }
-            }else{
-                requestStoragePermission({
-                    if(viewModel.checkBook(it)){
-                        findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment(it))
-                    }else{
-                        Toast.makeText(requireContext(),"该书籍已不存在！",Toast.LENGTH_LONG).show()
-                        viewModel.deleteBook(it)
-                    }
-                },{
-                    makeLongToast(requireContext(),"未授予存储权限，无法打开书籍")
-                })
-            }
+            },{
+                makeLongToast(requireContext(),"未授予存储权限，无法打开书籍")
+            })
         }
         binding.bookListRecycler.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
