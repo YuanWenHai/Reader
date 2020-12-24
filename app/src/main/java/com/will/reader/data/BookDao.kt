@@ -10,7 +10,7 @@ import com.will.reader.data.model.Book
 @Dao
 interface BookDao {
 
-    @Query("SELECT * FROM book")
+    @Query("SELECT * FROM book ORDER BY lastReadTime DESC")
     fun getAllBookInPage(): PagingSource<Int,Book>
 
     @Query("SELECT * FROM book WHERE id= :id")

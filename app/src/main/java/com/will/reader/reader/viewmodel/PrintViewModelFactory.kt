@@ -1,8 +1,7 @@
-package com.will.reader.print
+package com.will.reader.reader.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
 import com.will.reader.data.model.Book
 

@@ -1,12 +1,7 @@
-package com.will.reader.print
+package com.will.reader.reader
 
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Paint
-import android.os.BatteryManager
 import com.will.reader.data.model.Book
-import com.will.reader.util.getFormattedTime
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.StringBuilder
@@ -15,7 +10,6 @@ import java.nio.channels.FileChannel
 import java.nio.charset.Charset
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * created  by will on 2020/11/29 11:43
@@ -65,6 +59,9 @@ class Printer(private var book: Book){
         val availablePos = findLastParagraphStartPos(targetPos)
         pageBegin = availablePos
     }
+    fun skipToPosition(position: Int){
+        pageBegin = position
+    }
 
     /**
      * 从当前page begin位置开始排版一页内容，并将current position 移动到下一页首个byte
@@ -72,8 +69,9 @@ class Printer(private var book: Book){
     fun print(config: Config): Page{
         val page = compose(pageBegin,config)
         currentPage = page
-        currentPosition = page.currentPosition
-        return page
+        currentPosition = page.position
+        //这里使用当前页首的位置，而非下一页首的位置
+        return page.copy(position = pageBegin)
     }
 
     /**
@@ -86,8 +84,8 @@ class Printer(private var book: Book){
         val page = compose(currentPosition,config)
         currentPage = page
         pageBegin = currentPosition
-        currentPosition = page.currentPosition
-        return page
+        currentPosition = page.position
+        return page.copy(position = pageBegin)
     }
 
     /**
@@ -95,14 +93,14 @@ class Printer(private var book: Book){
      */
     fun pageUp(config: Config): Page {
         if(pageBegin == 0){
-            return currentPage
+            return currentPage.copy(position = 0)
         }
         val start = findLastPageBegin(pageBegin,config)
         val page = compose(start,config)
         currentPage = page
         pageBegin = start
-        currentPosition = page.currentPosition
-        return page
+        currentPosition = page.position
+        return page.copy(position = pageBegin)
     }
 
     /**
@@ -302,7 +300,7 @@ class Printer(private var book: Book){
 
     data class Page(
         val lines: List<String>,
-        val currentPosition: Int,
+        val position: Int,
     )
     data class Config(
         val bottomBarHeight: Float,

@@ -5,14 +5,14 @@
     <data>
         <variable
             name="config"
-            type="com.will.reader.print.PrintConfig" />
+            type="com.will.reader.reader.PrintConfig" />
     </data>
 
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.will.reader.print.ReaderView
+        <com.will.reader.reader.ReaderView
             android:id="@+id/fragment_reader_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
@@ -74,6 +74,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/colorPrimaryLight"
+                        android:layout_marginEnd="10dp"
                         android:text="@string/text_decrease"/>
                     <Button
                         android:id="@+id/fragment_reader_text_size_increase"

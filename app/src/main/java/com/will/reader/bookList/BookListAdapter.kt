@@ -33,10 +33,12 @@ class BookListAdapter(private val callback: (item: Book) -> Unit): PagingDataAda
                 }
             }
         }
+        var book: Book? = null
 
         fun bind(book: Book){
             val viewModel = BookItem.build(book)
             binding.bookItem = viewModel
+            this.book = book
         }
 
     }

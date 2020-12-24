@@ -1,13 +1,9 @@
-package com.will.reader.print
+package com.will.reader.reader
 
-import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import androidx.activity.addCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -17,14 +13,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.will.reader.R
+import com.will.reader.chapterList.ChapterListFragment
 import com.will.reader.data.AppDataBase
 import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentReaderBinding
-import com.will.reader.util.LOG_TAG
+import com.will.reader.reader.viewmodel.PrintViewModelFactory
+import com.will.reader.reader.viewmodel.ReaderViewModel
 import com.will.reader.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.math.min
 
 /**
  * created  by will on 2020/11/29 17:31
@@ -112,9 +109,13 @@ class ReaderFragment: Fragment() {
         setFragmentResultListener(SkipProgressFragment.REQUEST_KEY){
             _, bundle ->
             val value = bundle.getFloat(SkipProgressFragment.VALUE_KEY)
-            viewModel.skipProgress(requireContext(),value)
+            viewModel.skipToProgress(requireContext(),value)
             viewModel.closeMenu()
-
+        }
+        setFragmentResultListener(ChapterListFragment.REQUEST_KEY){
+            _,bundle ->
+            val value = bundle.getInt(ChapterListFragment.VALUE_KEY)
+            viewModel.skipToPosition(requireContext(),value)
         }
     }
 

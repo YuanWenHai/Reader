@@ -1,19 +1,14 @@
-package com.will.reader.print
+package com.will.reader.reader
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.BatteryManager
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.will.reader.util.LOG_TAG
-import com.will.reader.util.getFormattedTime
-import kotlin.math.roundToInt
 
 /**
  * created  by will on 2020/11/29 11:52

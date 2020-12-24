@@ -1,26 +1,28 @@
-package com.will.reader.scan
+package com.will.reader.scan.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.will.reader.data.BookDao
 import com.will.reader.data.BookRepository
 import com.will.reader.data.model.Book
 import com.will.reader.extensions.isBook
+import com.will.reader.scan.FileItem
+import com.will.reader.scan.FileScanner
 import com.will.reader.util.LOG_TAG
+import com.will.reader.util.outputToFile
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.coroutines.CoroutineContext
 
 /**
  * created  by will on 2020/11/22 17:34
  */
-class ScannerViewModel(private val scanner: FileScanner,private val bookRepos: BookRepository): ViewModel() {
+class ScannerViewModel(private val scanner: FileScanner, private val bookRepos: BookRepository): ViewModel() {
     private val rootDir = Environment.getExternalStorageDirectory()
 
     private val list = MutableLiveData<MutableList<FileItem>>()
@@ -35,6 +37,10 @@ class ScannerViewModel(private val scanner: FileScanner,private val bookRepos: B
     }
     fun setHasPermission(which: Boolean){
         hasPermission.value = which
+    }
+    fun copyUriContentToAppStorage(uri: Uri,context: Context){
+        val input = context.contentResolver.openInputStream(uri)
+        val dest = context.openFileOutput("",Context.MODE_PRIVATE)
     }
 
     private fun addFileItem(item: FileItem){

@@ -13,7 +13,7 @@ import com.will.reader.databinding.ItemChapterBinding
 /**
  * created  by will on 2020/12/11 16:58
  */
-class ChapterListAdapter: PagingDataAdapter<Chapter,ChapterListAdapter.ChapterVH>(DiffCallback()) {
+class ChapterListAdapter(private val callback: (c: Chapter) -> Unit): PagingDataAdapter<Chapter,ChapterListAdapter.ChapterVH>(DiffCallback()) {
 
 
     override fun onBindViewHolder(holder: ChapterVH, position: Int) {
@@ -24,8 +24,12 @@ class ChapterListAdapter: PagingDataAdapter<Chapter,ChapterListAdapter.ChapterVH
         return ChapterVH(DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.item_chapter,parent,false))
     }
 
-    class ChapterVH(private val binding: ItemChapterBinding): RecyclerView.ViewHolder(binding.root){
-
+    inner class ChapterVH(private val binding: ItemChapterBinding): RecyclerView.ViewHolder(binding.root){
+        init {
+            binding.root.setOnClickListener {
+            getItem(absoluteAdapterPosition)?.let(callback)
+            }
+        }
         fun bind(chapter: Chapter){
             binding.itemChapterListName.text = chapter.name
         }

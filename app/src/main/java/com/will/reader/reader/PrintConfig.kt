@@ -1,4 +1,4 @@
-package com.will.reader.print
+package com.will.reader.reader
 
 import android.content.Context
 import android.graphics.Color

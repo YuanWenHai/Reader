@@ -1,15 +1,10 @@
 package com.will.reader.scan
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -21,8 +16,9 @@ import com.will.reader.data.BookRepository
 import com.will.reader.databinding.FragmentScannerBinding
 import com.will.reader.extensions.isBook
 import com.will.reader.extensions.toPath
+import com.will.reader.scan.viewmodel.ScannerViewModel
+import com.will.reader.scan.viewmodel.ScannerViewModelFactory
 import com.will.reader.util.makeLongToast
-import com.will.reader.util.makeToast
 import java.io.File
 
 /**
@@ -96,8 +92,7 @@ class ScannerFragment: BaseFragment(){
     private val pickFileCode = 32767
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.menu_scanner_open){
-            val intent = Intent().apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
+            val intent = Intent(Intent.ACTION_PICK).apply {
                 type = "text/plain"
                 action = Intent.ACTION_GET_CONTENT
             }
@@ -123,6 +118,8 @@ class ScannerFragment: BaseFragment(){
                     }
                     viewModel.save(file)
                     findNavController().popBackStack()
+                }else{
+                    makeLongToast(requireContext(),"添加失败，文件读取错误")
                 }
             }
         }else{

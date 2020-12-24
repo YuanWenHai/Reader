@@ -20,7 +20,7 @@
         android:label="ScannerFragment" />
     <fragment
         android:id="@+id/readerFragment"
-        android:name="com.will.reader.print.ReaderFragment"
+        android:name="com.will.reader.reader.ReaderFragment"
         android:label="ReaderFragment" >
        <!-- <argument
             android:name="book"

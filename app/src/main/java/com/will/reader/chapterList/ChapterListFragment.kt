@@ -3,11 +3,16 @@ package com.will.reader.chapterList
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.postDelayed
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.will.reader.R
 import com.will.reader.base.BaseFragment
 import com.will.reader.chapterList.viewmodel.ChapterListViewModel
@@ -56,19 +61,27 @@ class ChapterListFragment: BaseFragment() {
         binding.fragmentChapterListToolbar.setNavigationOnClickListener{parent.onBackPressed()}
 
 
-        val adapter = ChapterListAdapter()
+        val adapter = ChapterListAdapter(){
+            val bundle = Bundle()
+            bundle.putInt(VALUE_KEY,it.positionInByte)
+            setFragmentResult(REQUEST_KEY,bundle)
+            findNavController().popBackStack()
+        }
         binding.fragmentChapterListToolbar.title = appViewModel.book().value!!.name
         binding.fragmentChapterListRecycler.recycler().adapter = adapter
+        binding.fragmentChapterListRecycler.recycler().addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chapterFlow.collectLatest {
                 adapter.submitData(it)
             }
 
         }
+        viewModel.getCurrentIndex()
         viewLifecycleOwner.lifecycleScope.launch {
             adapter.loadStateFlow.collectLatest {
                 if(it.refresh is LoadState.NotLoading){
                     binding.fragmentChapterListRecycler.visibility = if(adapter.itemCount == 0) View.INVISIBLE else View.VISIBLE
+                    binding.fragmentChapterListRecycler.recycler().scrollToPosition(viewModel.getCurrentIndex().value?: 0)
                 }
             }
         }
@@ -89,5 +102,10 @@ class ChapterListFragment: BaseFragment() {
             makeLongToast(requireContext(),"已删除章节信息")
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    companion object{
+        const val REQUEST_KEY = "chapter_list_fragment_request_key"
+        const val VALUE_KEY = "chapter_list_fragment_value_key"
     }
 }

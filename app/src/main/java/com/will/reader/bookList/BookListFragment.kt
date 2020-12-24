@@ -1,17 +1,16 @@
 package com.will.reader.bookList
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.will.reader.R
 import com.will.reader.base.BaseFragment
 import com.will.reader.bookList.viewmodel.BookListViewModel
@@ -64,15 +63,24 @@ class BookListFragment: BaseFragment() {
                 makeLongToast(requireContext(),"未授予存储权限，无法打开书籍")
             })
         }
+        val swipeHandler = object: SwipeToDeleteCallback(requireContext()){
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val deleted = (viewHolder as BookListAdapter.ViewHolder).book
+                deleted?.let { appViewModel.deleteBook(deleted) }
+            }
+        }
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.bookListRecycler)
         binding.bookListRecycler.adapter = adapter
-        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
             viewModel.bookFlow.collectLatest {
                 adapter.submitData(it)
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             adapter.loadStateFlow.collectLatest {
-                binding.bookListEmptyView.visibility = if(adapter.itemCount == 0) View.VISIBLE else View.GONE
+                if(it.refresh is LoadState.NotLoading){
+                    binding.bookListEmptyView.visibility = if(adapter.itemCount == 0) View.VISIBLE else View.GONE
+                }
             }
         }
     }

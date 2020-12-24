@@ -1,17 +1,19 @@
-package com.will.reader.print
+package com.will.reader.reader.viewmodel
 
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
 import com.will.reader.data.model.Book
+import com.will.reader.reader.PrintConfig
+import com.will.reader.reader.PrintConfigRepos
+import com.will.reader.reader.Printer
+import com.will.reader.reader.ReaderView
 import com.will.reader.util.getFormattedTime
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -36,9 +38,17 @@ class ReaderViewModel(private var book: Book, private val chapterRepository: Cha
 
 
 
-    fun skipProgress(context: Context,progress: Float){
+    fun skipToProgress(context: Context, progress: Float){
         if(progress >= 0){
             printer.skipToProgress(progress)
+            config?.let {
+                applyConfigChanges(it,context)
+            }
+        }
+    }
+    fun skipToPosition(context: Context,position: Int){
+        if(position >= 0){
+            printer.skipToPosition(position)
             config?.let {
                 applyConfigChanges(it,context)
             }
@@ -111,11 +121,11 @@ class ReaderViewModel(private var book: Book, private val chapterRepository: Cha
         }
     }
 
-    private fun applyConfigChanges(config: PrintConfig,context: Context){
-        val c = Printer.Config.build(config,screenWidth,screenHeight)
+    private fun applyConfigChanges(config: PrintConfig, context: Context){
+        val c = Printer.Config.build(config, screenWidth, screenHeight)
         val printed = printer.print(c)
         val content = generateReaderContent(printed,context)
-        updateCurrentChapter(printed.currentPosition)
+        updateCurrentChapter(printed.position)
         page.value = content
     }
 
@@ -126,8 +136,8 @@ class ReaderViewModel(private var book: Book, private val chapterRepository: Cha
             closeMenu()
         }else{
             config?.let {
-                val printed = printer.pageUp(Printer.Config.build(it,screenWidth,screenHeight))
-                updateCurrentChapter(printed.currentPosition)
+                val printed = printer.pageUp(Printer.Config.build(it, screenWidth, screenHeight))
+                updateCurrentChapter(printed.position)
                 page.value = generateReaderContent(printed,context)
             }
         }
@@ -138,19 +148,19 @@ class ReaderViewModel(private var book: Book, private val chapterRepository: Cha
             closeMenu()
         }else{
             config?.let {
-                val config = Printer.Config.build(it,screenWidth,screenHeight)
+                val config = Printer.Config.build(it, screenWidth, screenHeight)
                 val printed = printer.pageDown(config)
                 val content = generateReaderContent(printed,context)
-                updateCurrentChapter(printed.currentPosition)
+                updateCurrentChapter(printed.position)
                 page.value = content
             }
         }
     }
 
 
-    private fun generateReaderContent(page: Printer.Page,context: Context): ReaderView.Content{
+    private fun generateReaderContent(page: Printer.Page, context: Context): ReaderView.Content {
         val timeText = "\uD83D\uDD52${getFormattedTime("HH:mm")}"
-        val progress = page.currentPosition*100/printer.getBook().size.toFloat()
+        val progress = page.position*100/printer.getBook().size.toFloat()
         val progressText = "%.2f".format(progress).plus("%")
         val batteryStatus = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let {
             context.registerReceiver(null,it)
@@ -161,7 +171,7 @@ class ReaderViewModel(private var book: Book, private val chapterRepository: Cha
             val percentage = level*100/scale.toFloat()
             "\uD83D\uDD0B${percentage.roundToInt()}%"
         } ?: ""
-        return ReaderView.Content(page.lines,timeText,progressText,batteryLevelText)
+        return ReaderView.Content(page.lines, timeText, progressText, batteryLevelText)
     }
 
 

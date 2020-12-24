@@ -1,8 +1,13 @@
 package com.will.reader.util
 
 import android.content.Context
+import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.withContext
+import java.io.*
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -39,4 +44,21 @@ fun byteSizeToFormattedString(size: Long): String{
 fun getFormattedTime(pattern: String): String{
     val formatter = SimpleDateFormat(pattern, Locale.CHINA)
     return formatter.format(Date(System.currentTimeMillis()))
+}
+
+suspend fun outputToFile(input: InputStream,dest: File){
+    withContext(IO){
+        try {
+        val out = FileOutputStream(dest)
+        val temp = ByteArray(8192)
+        var size = 0
+
+            while (size > -1){
+                size = BufferedInputStream(input).read(temp)
+                out.write(temp,0,size)
+            }
+        }catch (i: Exception){
+            i.printStackTrace()
+        }
+    }
 }

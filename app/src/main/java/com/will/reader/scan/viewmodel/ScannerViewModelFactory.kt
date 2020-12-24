@@ -1,11 +1,9 @@
-package com.will.reader.scan
+package com.will.reader.scan.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.will.reader.data.AppDataBase
-import com.will.reader.data.BookDao
 import com.will.reader.data.BookRepository
+import com.will.reader.scan.FileScanner
 
 /**
  * created  by will on 2020/11/26 16:42
