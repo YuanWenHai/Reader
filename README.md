@@ -1,6 +1,6 @@
 # Reader
 一个简单的阅读器   
-用了MVVM设计模式，以及JetPack的诸多依赖
+采用了MVVM设计模式，以及JetPack的诸多依赖
 
 
 ![main](./app/screenshots/main.jpg)
