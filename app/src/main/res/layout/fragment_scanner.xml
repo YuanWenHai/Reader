@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/check"
             android:src="@drawable/check_dark"
+            android:backgroundTint="@color/colorPrimaryLight"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_margin="25dp"/>

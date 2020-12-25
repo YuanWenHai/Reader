@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Reader</string>
+    <string name="app_name">阅读器R</string>
     <string name="book_list_empty_msg">列表中还没有书籍..</string>
     <string name="book_list_add">添加书籍</string>
     <string name="scanner">扫描文件</string>
