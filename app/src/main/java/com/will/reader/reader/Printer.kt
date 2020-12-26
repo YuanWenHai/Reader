@@ -120,7 +120,7 @@ class Printer(private var book: Book){
         return String(bytes,Charset.forName(book.encode))
     }
     /**
-     *寻找下一段末尾(/n)的byte位置,若已到文件末尾则返回-1
+     *寻找下一段首的byte位置,若已到文件末尾则返回-1
      * @param currentStart inclusive
      */
     private fun findNextParagraphStartPos(currentStart: Int): Int{
