@@ -8,3 +8,6 @@
 ![reader](./app/screenshots/reader.jpg)
 ![reader_menu](./app/screenshots/reader_menu.jpg)
 ![chapters](./app/screenshots/chapters.jpg)
+
+# License
+GPL
