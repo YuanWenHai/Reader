@@ -1,7 +1,7 @@
 # Reader
 一个简单的阅读器   
-采用了MVVM设计模式，以及JetPack的诸多依赖
-
+采用了MVVM设计模式，以及JetPack的诸多依赖  
+[下载](https://github.com/YuanWenHai/Reader/releases)
 
 ![main](./app/screenshots/main.jpg)
 ![scanner](./app/screenshots/scanner.jpg)
