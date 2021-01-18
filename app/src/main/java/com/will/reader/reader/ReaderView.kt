@@ -8,7 +8,9 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import com.will.reader.util.LOG_TAG
+import kotlin.math.abs
 
 /**
  * created  by will on 2020/11/29 11:52
@@ -16,6 +18,8 @@ import com.will.reader.util.LOG_TAG
 class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attributeSet) {
 
     private var clickFlag = false
+    private var downX = 0f
+    private val mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop * 5
     private var onClick: ((which: Int) -> Unit)? = null
     private var printConfig: PrintConfig? = null
     private var mContent = Content(emptyList(),"","","")
@@ -25,7 +29,10 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
-            MotionEvent.ACTION_DOWN -> clickFlag = true
+            MotionEvent.ACTION_DOWN -> {
+                clickFlag = true
+                downX = event.x
+            }
             MotionEvent.ACTION_CANCEL -> clickFlag = false
             MotionEvent.ACTION_OUTSIDE -> clickFlag = false
             MotionEvent.ACTION_UP -> {
@@ -94,6 +101,16 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
 
     private fun handleActonUp(event: MotionEvent) {
         val viewWidth = width
+        val offset = downX - event.x
+        if(abs(offset) > mTouchSlop){
+            if (offset > 0){
+                onClick?.let { it(RIGHT_CLICK) }
+            }else{
+                onClick?.let { it(LEFT_CLICK) }
+            }
+            return
+        }
+
         when (event.x) {
             in 0f..(viewWidth / 3f) -> onClick?.let { it(LEFT_CLICK) }
             in ((width / 3f) * 2)..width.toFloat() -> onClick?.let { it(RIGHT_CLICK) }
