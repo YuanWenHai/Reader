@@ -62,47 +62,6 @@ class ChapterFinder(private val book: Book) {
         }
     }.flowOn(IO)
 
-
-
-    suspend fun find(){
-        val bookFile = File(book.path)
-        if(!bookFile.isFile){
-            return
-        }
-        withContext(IO){
-
-            val fi = FileInputStream(bookFile)
-            val channel = fi.channel
-            val bytes = channel.map(FileChannel.MapMode.READ_ONLY,0,bookFile.length())
-            val chapters = mutableListOf<Chapter>()
-            var number = 0
-            var charCount = 0
-            var currentPos = 0
-            while (currentPos < bookFile.length()){
-                val line = readLine(currentPos,bytes)
-                charCount += line.text.length
-                if(regex.matches(line.text)){
-                    val chapter = Chapter.build(line.text,number,currentPos,0,book.id)
-                    if(chapters.isNotEmpty()){
-                        val c = chapters.last()
-                        chapters[chapters.lastIndex] = c.copy(charCount = charCount)
-                        charCount = 0
-                    }
-                    chapters.add(chapter)
-                    number++
-                }
-                currentPos = line.nextLineStart
-            }
-            if(chapters.isNotEmpty()){
-                val c = chapters.last()
-                chapters[chapters.lastIndex] = c.copy(charCount = charCount)
-            }
-            channel.close()
-            fi.close()
-        }
-
-    }
-
     private fun readLine(startPos: Int,bytes: MappedByteBuffer): Line{
         val lf = '\n'.toByte()
         var newStart = 0

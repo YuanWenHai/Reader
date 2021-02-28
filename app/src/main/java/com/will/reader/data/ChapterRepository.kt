@@ -27,6 +27,13 @@ class ChapterRepository private constructor (private val dao: ChapterDao) {
         return dao.getChaptersPagingByBookId(book.id)
     }
 
+    suspend fun getAllChapters(book: Book): List<Chapter>{
+        return withContext(IO){
+            dao.getAllChapters(book.id)
+        }
+    }
+
+
     suspend fun getChapterByBookAndPositionRange(book: Book, position: Int): Chapter?{
         if(position < 0){
             throw IllegalArgumentException("the position cannot be negative number")

@@ -3,14 +3,10 @@ package com.will.reader.chapterList
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.postDelayed
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.will.reader.R
@@ -22,8 +18,6 @@ import com.will.reader.data.ChapterRepository
 import com.will.reader.databinding.FragmentChapterListBinding
 import com.will.reader.util.makeLongToast
 import com.will.reader.viewmodel.AppViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * created  by will on 2020/12/11 15:53
@@ -48,12 +42,13 @@ class ChapterListFragment: BaseFragment() {
     }
 
     private fun initView(binding: FragmentChapterListBinding){
+        viewModel.start()
+
+
         // TODO: 2020/12/17  自定义正则匹配将在之后的版本迭代中完成
         binding.fragmentChapterListProfessionalText.setOnClickListener{
             makeLongToast(requireContext(),"正在开发中..")
         }
-
-
         setHasOptionsMenu(true)
         val parent = requireActivity() as AppCompatActivity
         parent.setSupportActionBar(binding.fragmentChapterListToolbar)
@@ -61,7 +56,7 @@ class ChapterListFragment: BaseFragment() {
         binding.fragmentChapterListToolbar.setNavigationOnClickListener{parent.onBackPressed()}
 
 
-        val adapter = ChapterListAdapter(){
+        val adapter = ChapterListAdapter{
             val bundle = Bundle()
             bundle.putInt(VALUE_KEY,it.positionInByte)
             setFragmentResult(REQUEST_KEY,bundle)
@@ -70,23 +65,24 @@ class ChapterListFragment: BaseFragment() {
         binding.fragmentChapterListToolbar.title = appViewModel.book().value!!.name
         binding.fragmentChapterListRecycler.recycler().adapter = adapter
         binding.fragmentChapterListRecycler.recycler().addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.chapterFlow.collectLatest {
-                adapter.submitData(it)
+
+
+
+        //observe data
+        viewModel.getCurrentIndex().observe(viewLifecycleOwner){
+            currentIndex ->
+            binding.root.post {
+                binding.fragmentChapterListRecycler.recycler().scrollToPosition(currentIndex)
             }
 
         }
-        viewModel.getCurrentIndex()
-        viewLifecycleOwner.lifecycleScope.launch {
-            adapter.loadStateFlow.collectLatest {
-                if(it.refresh is LoadState.NotLoading){
-                    binding.fragmentChapterListRecycler.visibility = if(adapter.itemCount == 0) View.INVISIBLE else View.VISIBLE
-                    binding.fragmentChapterListRecycler.recycler().scrollToPosition(viewModel.getCurrentIndex().value?: 0)
-                }
-            }
+        viewModel.getAllChapters().observe(viewLifecycleOwner){
+            adapter.submitList(it)
+            binding.fragmentChapterListRecycler.visibility = if(it.isNotEmpty()) View.VISIBLE else  View.INVISIBLE
         }
 
     }
+
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

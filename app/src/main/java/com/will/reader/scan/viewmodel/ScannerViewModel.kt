@@ -13,9 +13,12 @@ import com.will.reader.data.model.Book
 import com.will.reader.extensions.isBook
 import com.will.reader.scan.FileItem
 import com.will.reader.scan.FileScanner
+import com.will.reader.scan.FileScanner.Companion.CURSOR_FINISHED
 import com.will.reader.util.LOG_TAG
 import com.will.reader.util.outputToFile
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -32,9 +35,19 @@ class ScannerViewModel(private val scanner: FileScanner, private val bookRepos: 
     fun getCursor(): LiveData<String> = currentCursor
     fun hasPermission(): LiveData<Boolean> = hasPermission
 
+
     fun scan(){
-        scanner.scan(viewModelScope,rootDir,{fileItem -> addFileItem(fileItem)},{cursor -> currentCursor.postValue(cursor)})
+        viewModelScope.launch {
+            scanner.scan(rootDir).collect {
+                val prev = list.value ?: mutableListOf()
+                prev.add(it)
+                list.value = prev
+            }
+            currentCursor.value = CURSOR_FINISHED
+        }
     }
+
+
     fun setHasPermission(which: Boolean){
         hasPermission.value = which
     }
@@ -43,16 +56,6 @@ class ScannerViewModel(private val scanner: FileScanner, private val bookRepos: 
         val dest = context.openFileOutput("",Context.MODE_PRIVATE)
     }
 
-    private fun addFileItem(item: FileItem){
-        viewModelScope.launch(Main){
-            //addFileItem是个异步回调，因为操作的是同一个变量，所以这里同步处理
-            synchronized(list){
-                val value = list.value ?: mutableListOf()
-                value.add(item)
-                list.value = value
-            }
-        }
-    }
     fun changeSelectState(index: Int){
         val value = list.value!!
         val oldItem = value[index]
@@ -73,16 +76,16 @@ class ScannerViewModel(private val scanner: FileScanner, private val bookRepos: 
         }
     }
     private fun save(fileItems: List<FileItem>){
-        val list = mutableListOf<Book>()
-        fileItems.forEach{
-            val file = File(it.path)
-            if(file.exists() && file.isBook()){
-                list.add(Book.build(file))
-            }else{
-                Log.w(LOG_TAG,"ignore file: ${file.path},cause it does not exist or is not book")
-            }
-        }
         viewModelScope.launch {
+            val list = mutableListOf<Book>()
+            fileItems.forEach{
+                val file = File(it.path)
+                if(file.exists() && file.isBook()){
+                    list.add(Book.build(file))
+                }else{
+                    Log.w(LOG_TAG,"ignore file: ${file.path},cause it does not exist or is not book")
+                }
+            }
             bookRepos.saveBook(list)
         }
     }

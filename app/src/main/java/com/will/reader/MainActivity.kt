@@ -11,9 +11,11 @@ import com.will.reader.data.ChapterRepository
 import com.will.reader.viewmodel.AppViewModel
 
 //todo
+// 1.章节列表中的当前章节应高亮
+// 2.章节列表与对应进度不匹配，应该是差了一个字节，需要改
 // 3.异形屏匹配,屏幕反转
 // 4.阅读界面启动速度略慢，是全文件映射导致的，需要部分映射优化
-// 5.文件Intent获取的Uri转绝对路径可行性差，考虑将二进制文件复制到app独有空间？ 但contentResolver只能获取到二进制流，不能得到文件名，又该如何转存呢？
+// 5.Android10 权限适配
 class MainActivity : AppCompatActivity() {
     private val appViewModel: AppViewModel by viewModels{
         object: ViewModelProvider.Factory{

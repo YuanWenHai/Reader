@@ -22,7 +22,7 @@ class BookListViewModel(private val bookRepos: BookRepository,private val chapte
     /**
      * 检查该文件是否存在,有修改编辑则更新数据库
      */
-    fun checkBook(book: Book): Boolean{
+    fun checkIfBookExists(book: Book): Boolean{
         val bookFile = File(book.path)
         if(bookFile.isFile){
             if(book.size != bookFile.length()){

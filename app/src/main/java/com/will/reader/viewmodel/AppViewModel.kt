@@ -18,8 +18,8 @@ class AppViewModel(private val bookRepos: BookRepository,private val chapterRepo
 
 
     fun updateBook(book: Book){
-        currentBook.value = book
         viewModelScope.launch {
+            currentBook.value = book
             bookRepos.updateBook(book)
         }
     }

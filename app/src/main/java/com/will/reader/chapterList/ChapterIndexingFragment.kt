@@ -24,6 +24,7 @@ import com.will.reader.data.model.Book
 import com.will.reader.databinding.FragmentChapterIndexingBinding
 import com.will.reader.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
@@ -70,7 +71,7 @@ class ChapterIndexingFragment (): BaseDialogFragment() {
             val keyword = binding.root.findViewById<RadioButton>(checkedRadioId).text.toString()
             isCancelable = false
             viewLifecycleOwner.lifecycleScope.launch{
-                finder.indexing(keyword).collect {
+                finder.indexing(keyword).collectLatest {
                     when(it){
                         is ChapterFinder.FindResult.Find -> {
                             binding.fragmentChapterIndexChapterText.text = it.chapter.name

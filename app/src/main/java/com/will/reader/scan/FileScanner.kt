@@ -2,27 +2,52 @@ package com.will.reader.scan
 
 import com.will.reader.extensions.isBook
 import com.will.reader.extensions.toFormattedSize
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayDeque
+
 class FileScanner {
 
     private val resultList = mutableListOf<FileItem>()
 
-    fun scan(lifecycleScope: CoroutineScope,dir: File,
+    suspend fun scan(dir: File,
              itemCallback: (fileItem: FileItem) -> Unit,
              cursorCallback: (cursor: String) -> Unit) {
 
         if(!dir.exists()){
             return
         }
-        lifecycleScope.launch(IO){
+        withContext(IO){
             rec(dir,{file -> defaultFilter(file)},itemCallback,cursorCallback)
             cursorCallback(CURSOR_FINISHED)
         }
     }
+
+    fun scan(dir: File): Flow<FileItem> = flow {
+        val s = Stack<File>()
+        s.push(dir)
+        while (s.size > 0){
+            val d = s.pop()
+            val files = d.listFiles()
+            files?.forEach {
+                f ->
+                if(f.isFile){
+                    if(defaultFilter(f)){
+                        emit(FileItem(f))
+                    }
+                }else if(f.isDirectory){
+                    s.push(f)
+                }
+            }
+        }
+    }.flowOn(IO)
+
+
     private fun rec(f: File, filter: (file: File) -> Boolean,
                     itemCallback: (fileItem: FileItem) -> Unit,
                     cursorCallback: (cursor: String) -> Unit){
@@ -36,7 +61,7 @@ class FileScanner {
             }
         }else if (f.isFile){
             if(filter(f)) {
-                val fileItem = FileItem(name = f.name,size = f.toFormattedSize(),path = f.path,false)
+                val fileItem = FileItem(f)
                 itemCallback(fileItem)
             }
 
