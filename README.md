@@ -4,7 +4,7 @@
 [Apk下载](https://github.com/YuanWenHai/Reader/releases)
 
 
-![gif](./app/screenshots/reader1.0.1_gif.gif)
+<img alt="gif" src="./app/screenshots/reader1.0.1_gif.gif"  width="500"/>
 
 # License
 GPL
