@@ -24,6 +24,9 @@ interface ChapterDao {
     @Query("SELECT * FROM chapter WHERE bookId = :id ORDER BY number ASC")
     fun getChaptersPagingByBookId(id: Long): PagingSource<Int,Chapter>
 
+    @Query("SELECT * FROM  chapter WHERE bookId = :id ORDER BY number ASC")
+    fun getAllChapters(id: Long): List<Chapter>
+
     @Insert
     fun saveChapter(chapter: Chapter)
 

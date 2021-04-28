@@ -52,7 +52,7 @@ class BookListFragment: BaseFragment() {
         val adapter = BookListAdapter{
             book ->
             runWithStoragePermission({
-                if(viewModel.checkBook(book)){
+                if(viewModel.checkIfBookExists(book)){
                     appViewModel.updateBook(book)
                     findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment())
                 }else{
