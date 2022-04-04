@@ -32,7 +32,11 @@ fun logE(content: String){
     Log.e(LOG_TAG,content)
 }
 fun byteSizeToFormattedString(size: Long): String{
+
     val units = arrayOf("Byte","Kb","Mb","Gb","Tb")
+    if(size == 0L){
+        return "$size${units[0]}"
+    }
     val base = log10(1024.0)
     val logged = log10(size.toDouble())
     val index = (logged/base).toInt()

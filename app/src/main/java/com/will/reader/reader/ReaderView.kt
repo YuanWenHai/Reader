@@ -2,8 +2,10 @@ package com.will.reader.reader
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -15,16 +17,19 @@ import kotlin.math.abs
 /**
  * created  by will on 2020/11/29 11:52
  */
-class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attributeSet) {
+class ReaderView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
     private var clickFlag = false
     private var downX = 0f
     private val mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop * 5
     private var onClick: ((which: Int) -> Unit)? = null
     private var printConfig: PrintConfig? = null
-    private var mContent = Content(emptyList(),"","","")
-    private var mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-
+    private var mContent = Content(emptyList(), "", "", "")
+    private val mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val mBackground = BitmapFactory.decodeStream(context.assets.open("bg.png"))
+    private val mBitmapRect by lazy {
+        Rect(0, 0, width, height)
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -46,13 +51,14 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
         return true
     }
 
-    fun setConfig(config: PrintConfig){
+    fun setConfig(config: PrintConfig) {
         this.printConfig = config
         this.mPaint.textSize = config.textSize
     }
-    fun submitContent(content: Content){
-        if(printConfig == null){
-            Log.e(LOG_TAG,"must invoke setConfig before")
+
+    fun submitContent(content: Content) {
+        if (printConfig == null) {
+            Log.e(LOG_TAG, "must invoke setConfig before")
             return
         }
         mContent = content
@@ -60,25 +66,25 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
     }
 
 
-    fun setOnClickListener(listener: (which: Int) -> Unit){
+    fun setOnClickListener(listener: (which: Int) -> Unit) {
         this.onClick = listener
     }
 
     override fun onDraw(canvas: Canvas?) {
-        if(canvas != null && printConfig != null){
+        if (canvas != null && printConfig != null) {
             val config: PrintConfig = printConfig!!
-            canvas.drawColor(config.backgroundColor)
-            mContent.lines.forEachIndexed{
-                    index, line ->
+            canvas.drawBitmap(mBackground, null, mBitmapRect, mPaint)
+            mContent.lines.forEachIndexed { index, line ->
                 val x = config.textMarginStart
-                val y = config.textMarginTop + ((index+1)*(config.textSize+config.textLineSpace))
-                canvas.drawText(line,x,y,mPaint)
+                val y =
+                    config.textMarginTop + ((index + 1) * (config.textSize + config.textLineSpace))
+                canvas.drawText(line, x, y, mPaint)
             }
-            drawBottomBar(canvas,config,mContent)
+            drawBottomBar(canvas, config, mContent)
         }
     }
 
-    private fun drawBottomBar(canvas: Canvas,config: PrintConfig,content: Content){
+    private fun drawBottomBar(canvas: Canvas, config: PrintConfig, content: Content) {
         val bottomBarTextSize = config.bottomBarHeight * 0.66f
         val y = height - (config.bottomBarHeight * 0.34f)
         val timeText = content.time
@@ -86,26 +92,25 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
         val progressText = content.progress
         mPaint.textSize = bottomBarTextSize
         //draw battery level text
-        canvas.drawText(batteryLevelText,config.textMarginStart,y,mPaint)
+        canvas.drawText(batteryLevelText, config.textMarginStart, y, mPaint)
         //draw progress text
         val progressX = (width - mPaint.measureText(progressText)) * 0.5f
-        canvas.drawText(progressText,progressX,y,mPaint)
+        canvas.drawText(progressText, progressX, y, mPaint)
         //draw time text
         val timeX = width - config.textMarginEnd - mPaint.measureText(timeText)
-        canvas.drawText(timeText,timeX,y,mPaint)
+        canvas.drawText(timeText, timeX, y, mPaint)
         mPaint.textSize = config.textSize
 
     }
 
 
-
     private fun handleActonUp(event: MotionEvent) {
         val viewWidth = width
         val offset = downX - event.x
-        if(abs(offset) > mTouchSlop){
-            if (offset > 0){
+        if (abs(offset) > mTouchSlop) {
+            if (offset > 0) {
                 onClick?.let { it(RIGHT_CLICK) }
-            }else{
+            } else {
                 onClick?.let { it(LEFT_CLICK) }
             }
             return
@@ -124,6 +129,7 @@ class ReaderView(context: Context,attributeSet: AttributeSet): View(context,attr
         val progress: String,
         val batteryLevel: String
     )
+
     companion object {
         const val LEFT_CLICK = 0
         const val CENTER_CLICK = 1

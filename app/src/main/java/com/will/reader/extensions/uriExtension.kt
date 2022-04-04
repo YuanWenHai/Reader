@@ -1,21 +1,39 @@
 package com.will.reader.extensions
 
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import java.lang.Exception
+
 
 /**
  * created  by will on 2020/11/27 12:30
  */
-fun Uri.toPath(context: Context): String?{
 
-    try{
+fun Uri.getRealName(context: Context): String? {
+    val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+    val cr: ContentResolver = context.contentResolver
+    var realFileName: String? = null
+    val metaCursor = cr.query(this, projection, null, null, null)
+    if (metaCursor != null) {
+        try {
+            if (metaCursor.moveToFirst()) {
+                realFileName = metaCursor.getString(0)
+            }
+        } finally {
+            metaCursor.close()
+        }
+    }
+    return realFileName
+}
+
+fun Uri.toPath(context: Context): String? {
+
+    try {
         // DocumentProvider
         if (DocumentsContract.isDocumentUri(context, this)) {
             // ExternalStorageProvider
@@ -29,7 +47,10 @@ fun Uri.toPath(context: Context): String?{
 
             } else if (isDownloadsDocument(this)) {
                 val id = DocumentsContract.getDocumentId(this)
-                val contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
+                val contentUri = ContentUris.withAppendedId(
+                    Uri.parse("content://downloads/public_downloads"),
+                    java.lang.Long.valueOf(id)
+                )
                 return getDataColumn(context, contentUri, null, null)
             } else if (isMediaDocument(this)) {
                 val docId = DocumentsContract.getDocumentId(this)
@@ -52,20 +73,26 @@ fun Uri.toPath(context: Context): String?{
         } else if ("file".equals(this.scheme, ignoreCase = true)) {
             return this.path
         }
-    }catch (e: Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
     }
 
     return null
 }
-fun getDataColumn(context: Context, uri: Uri?, selection: String?, selectionArgs: Array<String>?): String? {
+
+fun getDataColumn(
+    context: Context,
+    uri: Uri?,
+    selection: String?,
+    selectionArgs: Array<String>?
+): String? {
     var cursor: Cursor? = null
     val column = "_data"
     val projection = arrayOf(column)
-    if(uri == null)
+    if (uri == null)
         return null
     try {
-        cursor = context.contentResolver.query(uri, projection, selection, selectionArgs,null)
+        cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
         if (cursor != null && cursor.moveToFirst()) {
             val column_index: Int = cursor.getColumnIndexOrThrow(column)
             return cursor.getString(column_index)
