@@ -26,7 +26,7 @@ class ReaderView(context: Context, attributeSet: AttributeSet) : View(context, a
     private var printConfig: PrintConfig? = null
     private var mContent = Content(emptyList(), "", "", "")
     private val mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val mBackground = BitmapFactory.decodeStream(context.assets.open("bg.png"))
+    private val mBackground = BitmapFactory.decodeStream(context.assets.open("bg_1.png"))
     private val mBitmapRect by lazy {
         Rect(0, 0, width, height)
     }

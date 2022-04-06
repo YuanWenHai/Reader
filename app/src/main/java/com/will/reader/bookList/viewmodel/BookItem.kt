@@ -17,10 +17,10 @@ data class BookItem(
 ) {
     companion object{
         fun build(book: Book): BookItem{
-            val formattedSize = byteSizeToFormattedString(book.size)
-            val lastReadTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(book.lastReadTime))
             val progressPercent = if(book.readProgressInByte == 0) 0.0 else (book.readProgressInByte.toDouble()/book.size.toDouble()) * 100
-            val progress = "已阅读%.2f".format(progressPercent).plus("%")
+            val formattedSize = "${byteSizeToFormattedString(book.size)}，已阅读%.2f".format(progressPercent).plus("%")
+            val lastReadTime = if(book.lastReadTime == 0L) "尚未开始阅读" else SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(book.lastReadTime))
+            val progress = "${byteSizeToFormattedString(book.size)}，已阅读%.2f".format(progressPercent).plus("%")
             return BookItem(
                     book.name, book.brief,formattedSize,lastReadTime,progress)
         }

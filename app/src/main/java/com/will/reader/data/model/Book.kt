@@ -11,8 +11,8 @@ import java.util.*
  */
 @Entity(tableName = "book")
 data class Book(
-        @PrimaryKey
-        val id: Long,
+        @PrimaryKey(autoGenerate = true)
+        var id: Long = 0,
         val name: String,
         val path: String,
         val encode: String,
@@ -28,7 +28,6 @@ data class Book(
                         return build(File(path))
                 }
                 fun build(file: File): Book{
-                        val id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE
                         val name = file.name
                         val path = file.path
                         val encode = "GB18030"
@@ -39,7 +38,6 @@ data class Book(
                         val lastReadTime = 0L
                         val lastReadParagraph = ""
                         return Book(
-                                id = id,
                                 name = name,
                                 path = path,
                                 encode = encode,

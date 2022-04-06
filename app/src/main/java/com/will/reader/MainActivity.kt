@@ -1,10 +1,12 @@
 package com.will.reader
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import com.will.reader.data.AppDataBase
 import com.will.reader.data.BookRepository
 import com.will.reader.data.ChapterRepository
@@ -27,11 +29,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        handleIntent(intent)
         //there is a develop branch's change
         appViewModel
+
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?){
+         intent?.data?.let {
+             appViewModel.addBook(it,this)
+             findNavController(R.id.main_container).popBackStack(R.id.bookListFragment,false)
+         }
     }
 
 

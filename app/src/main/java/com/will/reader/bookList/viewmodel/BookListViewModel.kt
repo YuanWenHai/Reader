@@ -22,40 +22,4 @@ class BookListViewModel(private val bookRepos: BookRepository,private val chapte
         bookRepos.bookInPaging()
     }.flow
 
-    /**
-     * 检查该文件是否存在,有修改编辑则更新数据库
-     */
-    fun checkIfBookExists(book: Book): Boolean{
-        val bookFile = File(book.path)
-        if(bookFile.isFile){
-            if(book.size != bookFile.length()){
-                viewModelScope.launch {
-                    bookRepos.updateBook(book)
-                }
-            }
-        }
-        return bookFile.isFile
-    }
-    fun deleteBook(book: Book){
-        viewModelScope.launch {
-            bookRepos.deleteBook(book)
-            chapterRepos.deleteChapterByBook(book)
-        }
-
-    }
-
-    fun addBook(file: File){
-        if(!file.exists()){
-            Log.w(LOG_TAG,"file: ${file.path} does not exits,save canceled")
-            return
-        }
-        if(!file.isBook()){
-            Log.w(LOG_TAG,"file: ${file.path} is not book,save canceled")
-            return
-        }
-        viewModelScope.launch {
-            bookRepos.saveBook(Book.build(file))
-        }
-    }
-
 }

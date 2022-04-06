@@ -67,12 +67,12 @@ class BookListFragment : BaseFragment() {
         val parent = activity as AppCompatActivity
         parent.setSupportActionBar(binding.bookListToolbar)
         val adapter = BookListAdapter { book ->
-            if (viewModel.checkIfBookExists(book)) {
+            if (appViewModel.checkIfBookExists(book)) {
                 appViewModel.updateBook(book)
                 findNavController().navigate(BookListFragmentDirections.actionBookListFragmentToReaderFragment())
             } else {
                 Toast.makeText(requireContext(), "该书籍已不存在！", Toast.LENGTH_LONG).show()
-                viewModel.deleteBook(book)
+                appViewModel.deleteBook(book)
             }
         }
         val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
@@ -117,33 +117,9 @@ class BookListFragment : BaseFragment() {
         return super.onOptionsItemSelected(item)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == pickFileCode && resultCode == Activity.RESULT_OK) {
-            if (data?.data != null) {
-                lifecycleScope.launch {
-                    withContext(Dispatchers.IO){
-                        try{
-                            val fileName = data.data.getRealName(requireContext()) ?: "${System.currentTimeMillis()}.txt"
-                            val targetFile = File(requireContext().getExternalFilesDir("books"),fileName)
-                            Files.copy(requireContext().contentResolver.openInputStream(data.data),Paths.get(targetFile.toString()))
-                            if (!targetFile.exists()) {
-                                makeLongToast(requireContext(), "添加失败，文件 ${targetFile.path}不存在")
-                                return@withContext
-                            }
-                            if (!targetFile.isBook()) {
-                                makeLongToast(requireContext(), "添加失败，文件 ${targetFile.path}不是文本文件")
-                                return@withContext
-                            }
-                            viewModel.addBook(targetFile)
-                        }catch (e: Exception){
-                            e.printStackTrace()
-                        }
-                    }
-                }
-            }else{
-                makeLongToast(requireContext(), "添加失败，文件读取错误")
-            }
+            appViewModel.addBook(data?.data,requireContext())
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }

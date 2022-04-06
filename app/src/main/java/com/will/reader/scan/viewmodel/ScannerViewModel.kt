@@ -15,10 +15,7 @@ import com.will.reader.scan.FileItem
 import com.will.reader.scan.FileScanner
 import com.will.reader.scan.FileScanner.Companion.CURSOR_FINISHED
 import com.will.reader.util.LOG_TAG
-import com.will.reader.util.outputToFile
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
 
